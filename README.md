@@ -1,6 +1,8 @@
 # raymoore.xyz
 
-This is a simple Java web application for personal projects.
+Simple web application for personal projects.
+
+Written mostly in Java.
 
 ## Connections Clone
 
