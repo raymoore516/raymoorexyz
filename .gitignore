@@ -1,3 +1,6 @@
+/src/main/java/xyz/raymoore/Sandbox.java
+
+### Java ###
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
