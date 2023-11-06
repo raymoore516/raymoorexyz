@@ -6,6 +6,8 @@ public class Settings {
     private Postgres postgres;
     private String secret;
 
+    // ---
+
     public Postgres getPostgres() {
         return postgres;
     }
