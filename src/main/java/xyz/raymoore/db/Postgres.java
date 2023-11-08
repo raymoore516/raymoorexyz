@@ -12,7 +12,7 @@ public class Postgres {
 
     // ---
 
-    public DataSource toDataSource() {
+    public DataSource createDataSource() {
         PGSimpleDataSource ds = new PGSimpleDataSource();
         ds.setUser(user);
         ds.setPassword(password);
