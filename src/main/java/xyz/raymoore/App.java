@@ -17,8 +17,8 @@ public class App {
 
         // Connections
         Connections connections = new Connections();
-        app.get("/connections", connections::home);
-        app.post("/connections", connections::submit);
+        app.get("connections", connections::home);
+        app.post("connections", connections::submit);
 
         // Start application
         app.start(PORT);
