@@ -1,0 +1,6 @@
+postgres:
+  user: $APP_DB_USER
+  password: $APP_DB_PASSWORD
+  server: $APP_DB_SERVER
+  database: $APP_DB_DATABASE
+secret: $APP_SECRET
