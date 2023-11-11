@@ -1,5 +1,5 @@
 POSTGRES_USER=postgres;
 POSTGRES_PASSWORD=password;
 POSTGRES_SERVER=localhost;
-POSTGRES_DATABASE=connections;
+POSTGRES_DATABASE=raymoorexyz;
 SECRET=secret;
