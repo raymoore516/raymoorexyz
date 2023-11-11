@@ -3,6 +3,7 @@ package xyz.raymoore;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.http.staticfiles.Location;
+import xyz.raymoore.connections.Connections;
 
 public class App {
     public static int PORT = 8080;
@@ -13,6 +14,11 @@ public class App {
 
         // TODO: Add pages after initial proof-of-concept
         app.get("/", ctx -> ctx.html("Hello world"));
+
+        // Connections
+        Connections connections = new Connections();
+        app.get("/connections", connections::home);
+        app.post("/connections", connections::submit);
 
         // Start application
         app.start(PORT);

@@ -1,6 +1,8 @@
-package xyz.raymoore.db;
+package xyz.raymoore.settings;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import org.postgresql.ds.PGSimpleDataSource;
+import xyz.raymoore.Settings;
 
 import javax.sql.DataSource;
 
@@ -14,10 +16,10 @@ public class Postgres {
 
     public DataSource createDataSource() {
         PGSimpleDataSource ds = new PGSimpleDataSource();
-        ds.setUser(user);
-        ds.setPassword(password);
-        ds.setServerNames(new String[]{server});
-        ds.setDatabaseName(database);
+        ds.setUser(Settings.get(user));
+        ds.setPassword(Settings.get(password));
+        ds.setServerNames(new String[]{ Settings.get(server) });
+        ds.setDatabaseName(Settings.get(database));
 
         return ds;
     }
@@ -32,6 +34,7 @@ public class Postgres {
         this.user = user;
     }
 
+    @JsonGetter
     public String getPassword() {
         return password;
     }

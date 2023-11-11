@@ -1,10 +1,16 @@
 package xyz.raymoore;
 
-import xyz.raymoore.db.Postgres;
+import xyz.raymoore.settings.Postgres;
 
 public class Settings {
     private Postgres postgres;
     private String secret;
+
+    // ---
+
+    public static String get(String value) {
+        return value.startsWith("$") ? System.getenv(value.substring(1)) : value;
+    }
 
     // ---
 
