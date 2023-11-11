@@ -1,3 +1,4 @@
+port: $PORT
 postgres:
   user: $POSTGRES_USER
   password: $POSTGRES_PASSWORD

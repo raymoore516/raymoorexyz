@@ -20,7 +20,7 @@ public class Connections {
     }
 
     public void render(@NotNull Context ctx) {
-        ctx.html(String.format("The secret is: %s", Settings.get(secret)));
+        ctx.html(String.format("The secret is: %s", secret));
     }
 
     public void submit(@NotNull Context ctx) throws SQLException {

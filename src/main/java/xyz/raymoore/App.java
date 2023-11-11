@@ -9,22 +9,24 @@ import java.io.File;
 import java.io.IOException;
 
 public class App {
-    public static int PORT = 8080;
+    public static String DEFAULT_PORT = "8080";
 
     public static void main(String[] args) throws IOException {
+        // Settings File
         File file = new File("src/env/settings.yaml");
-        Settings settings = Settings.from(file);
+        Settings settings = Settings.load(file);
 
+        // Javalin App + Home Page
         Javalin app = Javalin.create(App::configure);
         app.get("/", ctx -> ctx.html("Hello world"));
 
-        // Connections
+        // Connections Page
         Connections connections = new Connections(settings);
-        app.get("connections", connections::render);
-        app.post("connections", connections::submit);
+        app.get("connections", connections::render)
+                .post("connections", connections::submit);
 
-        // Start application
-        app.start(PORT);
+        int port = Integer.parseInt(settings.getPort() == null ? DEFAULT_PORT : settings.getPort());
+        app.start(port);
     }
 
     private static void configure(JavalinConfig config) {

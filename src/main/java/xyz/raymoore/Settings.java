@@ -12,22 +12,29 @@ public class Settings {
     @JsonIgnore
     public static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
 
+    private String port;
     private Postgres postgres;
     private String secret;
 
     // ---
 
-    public static Settings from(File yaml) throws IOException {
+    public static Settings load(File yaml) throws IOException {
         return YAML_MAPPER.readValue(yaml, Settings.class);
     }
 
-    // ---
-
-    public static String get(String value) {
+    public static String read(String value) {
         return value.startsWith("$") ? System.getenv(value.substring(1)) : value;
     }
 
     // ---
+
+    public String getPort() {
+        return read(port);
+    }
+
+    public void setPort(String port) {
+        this.port = port;
+    }
 
     public Postgres getPostgres() {
         return postgres;
@@ -38,7 +45,7 @@ public class Settings {
     }
 
     public String getSecret() {
-        return secret;
+        return read(secret);
     }
 
     public void setSecret(String secret) {
