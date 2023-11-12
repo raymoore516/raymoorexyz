@@ -1,4 +1,4 @@
-package xyz.raymoore.connections;
+package xyz.raymoore.app.connections;
 
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ public class Connections {
     private final String secret;
 
     public Connections(Settings settings) {
-        this.ds = settings.getPostgres().createDataSource();
+        this.ds = settings.getPostgres().useDataSource();
         this.secret = settings.getSecret();
     }
 

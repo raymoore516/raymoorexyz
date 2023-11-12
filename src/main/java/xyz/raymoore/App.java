@@ -3,7 +3,8 @@ package xyz.raymoore;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.http.staticfiles.Location;
-import xyz.raymoore.connections.Connections;
+import xyz.raymoore.app.connections.Connections;
+import xyz.raymoore.javalin.Before;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,12 +19,18 @@ public class App {
 
         // Javalin App + Home Page
         Javalin app = Javalin.create(App::configure);
+
+        // Before: Session Handler
+        Before before = new Before(settings);
+        app.before(before::session);
+
+        // Endpoint: Home
         app.get("/", ctx -> ctx.html("Hello world"));
 
-        // Connections Page
+        // Endpoint: Connections
         Connections connections = new Connections(settings);
-        app.get("connections", connections::render)
-                .post("connections", connections::submit);
+        app.get("connections", connections::render);
+        app.post("connections", connections::submit);
 
         int port = Integer.parseInt(settings.getPort() == null ? DEFAULT_PORT : settings.getPort());
         app.start(port);
