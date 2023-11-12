@@ -47,6 +47,6 @@ public class Filter {
     private void createSessionCookie(Context ctx) throws SQLException {
         Session session = new Session(UUID.randomUUID());
         Homes.use().getSessionHome().insert(session);
-        ctx.cookieStore().set(SESSION_COOKIE_KEY, session.getId());
+        ctx.cookieStore().set(SESSION_COOKIE_KEY, session.getId().toString());
     }
 }
