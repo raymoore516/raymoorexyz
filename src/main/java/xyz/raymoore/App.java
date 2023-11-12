@@ -4,6 +4,7 @@ import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.http.staticfiles.Location;
 import xyz.raymoore.app.connections.Connections;
+import xyz.raymoore.app.madisonsc.MadisonSC;
 import xyz.raymoore.javalin.Filter;
 
 import java.io.File;
@@ -29,8 +30,11 @@ public class App {
 
         // Endpoint: Connections
         Connections connections = new Connections(settings);
-        app.get("connections", connections::render);
-        app.post("connections", connections::submit);
+        connections.register(app);
+
+        // Endpoint: Madison Super Contest
+        MadisonSC madisonSC = new MadisonSC(settings);
+        madisonSC.register(app);
 
         // Start Javalin
         int port = Integer.parseInt(settings.getPort() == null ? DEFAULT_PORT : settings.getPort());

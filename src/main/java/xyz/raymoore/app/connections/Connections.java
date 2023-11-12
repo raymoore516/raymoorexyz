@@ -1,5 +1,6 @@
 package xyz.raymoore.app.connections;
 
+import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import xyz.raymoore.Homes;
@@ -28,7 +29,14 @@ public class Connections {
 
     // ---
 
-    public void render(@NotNull Context ctx) throws SQLException {
+    public void register(Javalin app) {
+        app.get("connections", this::showPage);
+        app.post("connections", this::submitGuess);
+    }
+
+    // ---
+
+    public void showPage(@NotNull Context ctx) throws SQLException {
         try (Connection conn = ds.getConnection()) {
             Homes.use().setConnection(conn);
 
@@ -43,7 +51,7 @@ public class Connections {
         }
     }
 
-    public void submit(@NotNull Context ctx) throws SQLException {
+    public void submitGuess(@NotNull Context ctx) throws SQLException {
         try (Connection conn = ds.getConnection()) {
             try (PreparedStatement statement = conn.prepareStatement("SELECT uuid_generate_v4()")) {
                 try (ResultSet rs = statement.executeQuery()) {
