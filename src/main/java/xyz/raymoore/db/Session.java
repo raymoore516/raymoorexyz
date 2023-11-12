@@ -6,12 +6,27 @@ import net.jextra.fauxjo.bean.FauxjoPrimaryKey;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.UUID;
 
 public class Session extends Fauxjo {
     @FauxjoPrimaryKey
     @FauxjoField("sessionId")
     private UUID id;
+
+    @FauxjoField(value = "entryDate", defaultable = true)
+    private Instant entryDate;
+
+    // ---
+
+    public Session() {
+    }
+
+    public Session(UUID id) {
+        this.id = id;
+    }
+
+    // ---
 
     public UUID getId() {
         return id;
@@ -21,12 +36,15 @@ public class Session extends Fauxjo {
         this.id = id;
     }
 
-    public Session() {
+    public Instant getEntryDate() {
+        return entryDate;
     }
 
-    public Session(UUID id) {
-        this.id = id;
+    public void setEntryDate(Instant entryDate) {
+        this.entryDate = entryDate;
     }
+
+    // ---
 
     public static class Home extends net.jextra.fauxjo.Home<Session> {
         public static final String SCHEMA = "app";

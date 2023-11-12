@@ -4,7 +4,7 @@ import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.http.staticfiles.Location;
 import xyz.raymoore.app.connections.Connections;
-import xyz.raymoore.javalin.Handler;
+import xyz.raymoore.javalin.Filter;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,16 +13,16 @@ public class App {
     public static String DEFAULT_PORT = "8080";
 
     public static void main(String[] args) throws IOException {
-        // Settings File
+        // Load Settings
         File file = new File("src/env/settings.yaml");
         Settings settings = Settings.load(file);
 
-        // Javalin App + Home Page
+        // Create Javalin
         Javalin app = Javalin.create(App::configure);
 
         // Before: Session Handler
-        Handler handler = new Handler(settings);
-        app.before(handler::before);
+        Filter filter = new Filter(settings);
+        app.before(filter::before);
 
         // Endpoint: Home
         app.get("/", ctx -> ctx.html("Hello world"));
@@ -32,6 +32,7 @@ public class App {
         app.get("connections", connections::render);
         app.post("connections", connections::submit);
 
+        // Start Javalin
         int port = Integer.parseInt(settings.getPort() == null ? DEFAULT_PORT : settings.getPort());
         app.start(port);
     }

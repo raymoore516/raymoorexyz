@@ -11,12 +11,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class Handler {
+public class Filter {
     public static final String SESSION_COOKIE_KEY = "raymoore.xyz";
 
     private final DataSource ds;
 
-    public Handler(Settings settings) {
+    public Filter(Settings settings) {
         this.ds = settings.getPostgres().useDataSource();
     }
 
