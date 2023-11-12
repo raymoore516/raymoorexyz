@@ -21,18 +21,27 @@ public class Before {
     }
 
     public void handle(@NotNull Context ctx) throws SQLException {
-        if (ctx.cookieStore().get(SESSION_COOKIE_KEY) == null) {
-            createSessionCookie(ctx);
+        try (Connection conn = ds.getConnection()) {
+            Homes.use().setConnection(conn);
+
+            // Handle scenario where browser cookie does not exist
+            if (ctx.cookieStore().get(SESSION_COOKIE_KEY) == null) {
+                createSessionCookie(ctx);
+            }
+
+            // Handle scenario where browser cookie is corrupt
+            String cookie = ctx.cookieStore().get(SESSION_COOKIE_KEY);
+            UUID sessionId = UUID.fromString(cookie);
+            Session session = Homes.use().getSessionHome().find(sessionId);
+            if (session == null) {
+                createSessionCookie(ctx);
+            }
         }
     }
 
     private void createSessionCookie(Context ctx) throws SQLException {
         Session session = new Session(UUID.randomUUID());
-        try (Connection conn = ds.getConnection()) {
-            Homes.use().setConnection(conn);
-            Homes.use().getSessionHome().insert(session);
-        }
-
+        Homes.use().getSessionHome().insert(session);
         ctx.cookieStore().set(SESSION_COOKIE_KEY, session.getId());
     }
 }
