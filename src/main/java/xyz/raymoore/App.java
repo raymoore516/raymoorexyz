@@ -4,7 +4,7 @@ import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.http.staticfiles.Location;
 import xyz.raymoore.app.connections.Connections;
-import xyz.raymoore.javalin.Before;
+import xyz.raymoore.javalin.Handler;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,8 +21,8 @@ public class App {
         Javalin app = Javalin.create(App::configure);
 
         // Before: Session Handler
-        Before before = new Before(settings);
-        app.before(before::handle);
+        Handler handler = new Handler(settings);
+        app.before(handler::before);
 
         // Endpoint: Home
         app.get("/", ctx -> ctx.html("Hello world"));

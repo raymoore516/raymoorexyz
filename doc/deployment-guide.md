@@ -72,7 +72,7 @@ docker build -t raymoorexyz .
 
 ## Step 3: Docker Repository
 
-Once the image is built, it must be tagged properly before uploaded to Docker Hub.
+Once the image is built, it must be tagged properly handler uploaded to Docker Hub.
 - The local image has name `raymoorexyz` with tag `latest`
 - The repository image has name `raymoore516/private` with tag `raymoorexyz-webapp`
 

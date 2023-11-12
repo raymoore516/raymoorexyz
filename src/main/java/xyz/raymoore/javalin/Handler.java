@@ -11,31 +11,36 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class Before {
+public class Handler {
     public static final String SESSION_COOKIE_KEY = "raymoore.xyz";
 
     private final DataSource ds;
 
-    public Before(Settings settings) {
+    public Handler(Settings settings) {
         this.ds = settings.getPostgres().useDataSource();
     }
 
-    public void handle(@NotNull Context ctx) throws SQLException {
+    public void before(@NotNull Context ctx) throws SQLException {
         try (Connection conn = ds.getConnection()) {
             Homes.use().setConnection(conn);
+            handleSession(ctx);
+        }
+    }
 
-            // Handle scenario where browser cookie does not exist
-            if (ctx.cookieStore().get(SESSION_COOKIE_KEY) == null) {
-                createSessionCookie(ctx);
-            }
+    // ---
 
-            // Handle scenario where browser cookie is corrupt
-            String cookie = ctx.cookieStore().get(SESSION_COOKIE_KEY);
-            UUID sessionId = UUID.fromString(cookie);
-            Session session = Homes.use().getSessionHome().find(sessionId);
-            if (session == null) {
-                createSessionCookie(ctx);
-            }
+    private void handleSession(Context ctx) throws SQLException {
+        // Handle scenario where browser cookie does not exist
+        if (ctx.cookieStore().get(SESSION_COOKIE_KEY) == null) {
+            createSessionCookie(ctx);
+        }
+
+        // Handle scenario where browser cookie is corrupt
+        String cookie = ctx.cookieStore().get(SESSION_COOKIE_KEY);
+        UUID sessionId = UUID.fromString(cookie);
+        Session session = Homes.use().getSessionHome().find(sessionId);
+        if (session == null) {
+            createSessionCookie(ctx);
         }
     }
 
