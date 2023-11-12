@@ -98,5 +98,3 @@ Therefore, Render is the preferred method for this web application, using the re
 ```
 docker.io/raymoore516/private:raymoorexyz-webapp
 ```
-
-The 
