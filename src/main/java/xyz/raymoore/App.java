@@ -6,7 +6,6 @@ import io.javalin.http.staticfiles.Location;
 import xyz.raymoore.app.connections.Connections;
 import xyz.raymoore.app.madisonsc.MadisonSC;
 import xyz.raymoore.javalin.Filter;
-import xyz.raymoore.javalin.Routes;
 
 import java.io.File;
 import java.io.IOException;
