@@ -2,7 +2,9 @@
 
 Simple web application for personal projects.
 
-Written mostly in Java.
+Written mostly in Java with Javalin as a foundation.
+
+See the [doc](doc) folder for technical notes.
 
 ## Connections Clone
 

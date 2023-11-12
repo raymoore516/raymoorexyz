@@ -4,8 +4,9 @@ import org.postgresql.ds.PGSimpleDataSource;
 import xyz.raymoore.Settings;
 
 import javax.sql.DataSource;
+import java.util.Set;
 
-public class Postgres extends Settings {
+public class Postgres {
     private String user;
     private String password;
     private String server;
@@ -15,10 +16,10 @@ public class Postgres extends Settings {
 
     public DataSource createDataSource() {
         PGSimpleDataSource ds = new PGSimpleDataSource();
-        ds.setUser(read(user));
-        ds.setPassword(read(password));
-        ds.setServerNames(new String[]{read(server)});
-        ds.setDatabaseName(read(database));
+        ds.setUser(Settings.read(user));
+        ds.setPassword(Settings.read(password));
+        ds.setServerNames(new String[]{Settings.read(server)});
+        ds.setDatabaseName(Settings.read(database));
 
         return ds;
     }
@@ -26,7 +27,7 @@ public class Postgres extends Settings {
     // ---
 
     public String getUser() {
-        return read(user);
+        return Settings.read(user);
     }
 
     public void setUser(String user) {
@@ -34,7 +35,7 @@ public class Postgres extends Settings {
     }
 
     public String getPassword() {
-        return read(password);
+        return Settings.read(password);
     }
 
     public void setPassword(String password) {
@@ -42,7 +43,7 @@ public class Postgres extends Settings {
     }
 
     public String getServer() {
-        return read(server);
+        return Settings.read(server);
     }
 
     public void setServer(String server) {
@@ -50,7 +51,7 @@ public class Postgres extends Settings {
     }
 
     public String getDatabase() {
-        return read(database);
+        return Settings.read(database);
     }
 
     public void setDatabase(String database) {
