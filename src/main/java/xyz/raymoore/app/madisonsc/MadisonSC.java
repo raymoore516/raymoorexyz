@@ -3,6 +3,7 @@ package xyz.raymoore.app.madisonsc;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import net.jextra.fauxjo.HomeGroup;
+import net.jextra.fauxjo.transaction.Transaction;
 import org.jetbrains.annotations.NotNull;
 import xyz.raymoore.AppHomes;
 import xyz.raymoore.AppSettings;
@@ -16,7 +17,6 @@ import xyz.raymoore.javalin.Routes;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.UUID;
 
 public class MadisonSC implements Routes {
     private final DataSource ds;
@@ -44,14 +44,15 @@ public class MadisonSC implements Routes {
     }
 
     public void submitWeeklyPicks(@NotNull Context ctx) throws Exception {
-        try (Connection conn = ds.getConnection()) {
-            Engine engine = new Engine(conn);
+        try (Transaction trans = new Transaction(ds.getConnection())) {
+            Engine engine = new Engine(trans.getConnection());
 
             int year = Integer.parseInt(ctx.pathParam("year"));
             int week = Integer.parseInt(ctx.pathParam("week"));
             PicksSubmission submission = ctx.bodyAsClass(PicksSubmission.class);
 
             engine.submitWeeklyPicks(year, week, submission);
+            trans.commit();
         }
     }
 
@@ -65,10 +66,14 @@ public class MadisonSC implements Routes {
         }
 
         public void submitWeeklyPicks(int year, int week, PicksSubmission submission) throws SQLException {
-            UUID contestantId = new UUID(0, 0);
+            Contestant contestant = homes.getContestantHome().findByName(submission.getContestant());
+            if (contestant == null) {
+                throw new SQLException("Contestant not found");
+            }
+
             for (String shorthand : submission.getPicks()) {
                 Pick bean = parseWeeklyPick(year, week, shorthand);
-                bean.setContestantId(contestantId);
+                bean.setContestantId(contestant.getId());
                 homes.getPickHome().insert(bean);
             }
         }

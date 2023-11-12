@@ -4,6 +4,8 @@ import net.jextra.fauxjo.bean.Fauxjo;
 import net.jextra.fauxjo.bean.FauxjoField;
 import net.jextra.fauxjo.bean.FauxjoPrimaryKey;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -51,6 +53,14 @@ public class Contestant extends Fauxjo {
 
         public Home() {
             super(SCHEMA + ".Contestant", Contestant.class);
+        }
+
+        public Contestant findByName(String name) throws SQLException {
+            String clause = "where lower(name)=?";
+            PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
+            statement.setString(1, name.toLowerCase());
+
+            return getUnique(statement.executeQuery());
         }
     }
 }
