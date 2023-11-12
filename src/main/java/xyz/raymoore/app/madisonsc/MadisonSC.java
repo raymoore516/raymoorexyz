@@ -1,16 +1,16 @@
 package xyz.raymoore.app.madisonsc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import net.jextra.fauxjo.HomeGroup;
 import org.jetbrains.annotations.NotNull;
 import xyz.raymoore.AppHomes;
 import xyz.raymoore.AppSettings;
-import xyz.raymoore.app.madisonsc.bean.*;
-import xyz.raymoore.app.madisonsc.category.*;
-import xyz.raymoore.app.madisonsc.db.*;
+import xyz.raymoore.app.madisonsc.bean.PicksSubmission;
+import xyz.raymoore.app.madisonsc.category.Result;
+import xyz.raymoore.app.madisonsc.category.Team;
+import xyz.raymoore.app.madisonsc.db.Contestant;
+import xyz.raymoore.app.madisonsc.db.Pick;
 import xyz.raymoore.javalin.Routes;
 
 import javax.sql.DataSource;
@@ -62,10 +62,6 @@ public class MadisonSC implements Routes {
 
         public Engine(Connection conn) throws SQLException {
             this.homes = new Homes(conn);
-        }
-
-        public void setConnection(Connection conn) throws SQLException {
-            this.homes.setConnection(conn);
         }
 
         public void submitWeeklyPicks(int year, int week, PicksSubmission submission) throws SQLException {
