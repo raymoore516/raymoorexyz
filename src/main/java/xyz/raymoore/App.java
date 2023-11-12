@@ -22,7 +22,7 @@ public class App {
 
         // Before: Session Handler
         Before before = new Before(settings);
-        app.before(before::session);
+        app.before(before::handle);
 
         // Endpoint: Home
         app.get("/", ctx -> ctx.html("Hello world"));

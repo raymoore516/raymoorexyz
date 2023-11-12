@@ -20,19 +20,19 @@ public class Before {
         this.ds = settings.getPostgres().useDataSource();
     }
 
-    public void session(@NotNull Context ctx) throws SQLException {
+    public void handle(@NotNull Context ctx) throws SQLException {
         if (ctx.cookieStore().get(SESSION_COOKIE_KEY) == null) {
-            Session session = createSession();
-            ctx.cookieStore().set(SESSION_COOKIE_KEY, session.getId());
+            createSessionCookie(ctx);
         }
     }
 
-    private Session createSession() throws SQLException {
+    private void createSessionCookie(Context ctx) throws SQLException {
         Session session = new Session(UUID.randomUUID());
         try (Connection conn = ds.getConnection()) {
             Homes.use().setConnection(conn);
             Homes.use().getSessionHome().insert(session);
-            return session;
         }
+
+        ctx.cookieStore().set(SESSION_COOKIE_KEY, session.getId());
     }
 }
