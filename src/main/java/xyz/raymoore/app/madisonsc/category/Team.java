@@ -42,6 +42,16 @@ public enum Team {
         this.name = name;
     }
 
+    public static Team find(String key) {
+        for (Team team : values()) {
+            if (team.name().equals(key)) {
+                return team;
+            }
+        }
+
+        return null;
+    }
+
     public String getLocation() {
         return location;
     }

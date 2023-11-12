@@ -9,10 +9,10 @@ import java.util.UUID;
 
 public class Contestant extends Fauxjo {
     @FauxjoPrimaryKey
-    @FauxjoField("contestantId")
+    @FauxjoField(value = "contestantId", defaultable = true)
     private UUID id;
 
-    @FauxjoField("entryDate")
+    @FauxjoField(value = "entryDate", defaultable = true)
     private Instant entryDate;
 
     @FauxjoField("name")

@@ -1,16 +1,19 @@
 package xyz.raymoore.app.madisonsc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import xyz.raymoore.Homes;
 import xyz.raymoore.Settings;
+import xyz.raymoore.app.madisonsc.bean.WeeklyPicks;
+import xyz.raymoore.javalin.Routes;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class MadisonSC {
+public class MadisonSC implements Routes {
     private final DataSource ds;
 
     // ---
@@ -35,9 +38,16 @@ public class MadisonSC {
         }
     }
 
-    public void submitPicks(@NotNull Context ctx) throws SQLException {
+    public void submitPicks(@NotNull Context ctx) throws SQLException, JsonProcessingException {
         try (Connection conn = ds.getConnection()) {
             Homes.use().setConnection(conn);
+
+            int year = Integer.parseInt(ctx.pathParam("year"));
+            int week = Integer.parseInt(ctx.pathParam("week"));
+            WeeklyPicks bean = ctx.bodyAsClass(WeeklyPicks.class);
+
+            StorageEngine engine = new StorageEngine();
+            engine.submitPicks(year, week, bean);
 
             // TODO...
         }

@@ -10,10 +10,10 @@ import java.util.UUID;
 
 public class Pick {
     @FauxjoPrimaryKey
-    @FauxjoField("pickId")
+    @FauxjoField(value = "pickId", defaultable = true)
     private UUID pickId;
 
-    @FauxjoField("entryDate")
+    @FauxjoField(value = "entryDate", defaultable = true)
     private Instant entryDate;
 
     @FauxjoField("contestantId")

@@ -6,14 +6,19 @@ import io.javalin.http.staticfiles.Location;
 import xyz.raymoore.app.connections.Connections;
 import xyz.raymoore.app.madisonsc.MadisonSC;
 import xyz.raymoore.javalin.Filter;
+import xyz.raymoore.javalin.Routes;
 
 import java.io.File;
 import java.io.IOException;
 
-public class App {
+public class App implements Routes {
     public static String DEFAULT_PORT = "8080";
 
+    private static App instance;
+
     public static void main(String[] args) throws IOException {
+        instance = new App();
+
         // Load Settings
         File file = new File("src/env/settings.yaml");
         Settings settings = Settings.load(file);
@@ -40,6 +45,13 @@ public class App {
         int port = Integer.parseInt(settings.getPort() == null ? DEFAULT_PORT : settings.getPort());
         app.start(port);
     }
+
+    @Override
+    public void register(Javalin app) {
+        app.get("/", ctx -> ctx.html("Hello world"));
+    }
+
+    // ---
 
     private static void configure(JavalinConfig config) {
         config.staticFiles.add("src/main/webapp", Location.EXTERNAL);
