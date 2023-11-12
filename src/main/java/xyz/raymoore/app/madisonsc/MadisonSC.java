@@ -51,9 +51,9 @@ public class MadisonSC implements Routes {
 
             int year = Integer.parseInt(ctx.pathParam("year"));
             int week = Integer.parseInt(ctx.pathParam("week"));
-            PicksRequest request = ctx.bodyAsClass(PicksRequest.class);
+            PicksSubmission submission = ctx.bodyAsClass(PicksSubmission.class);
 
-            engine.submitWeeklyPicks(year, week, request);
+            engine.submitWeeklyPicks(year, week, submission);
             homes.close();
         }
     }
@@ -61,12 +61,12 @@ public class MadisonSC implements Routes {
     // ---
 
     public static class Engine {
-        public void submitWeeklyPicks(int year, int week, PicksRequest request) throws Exception {
+        public void submitWeeklyPicks(int year, int week, PicksSubmission submission) throws Exception {
             ObjectMapper mapper = new ObjectMapper();
             ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
 
-            System.out.println(writer.writeValueAsString(request));
-            for (String pick : request.getPicks()) {
+            System.out.println(writer.writeValueAsString(submission));
+            for (String pick : submission.getPicks()) {
                 parseWeeklyPick(pick);
             }
         }
