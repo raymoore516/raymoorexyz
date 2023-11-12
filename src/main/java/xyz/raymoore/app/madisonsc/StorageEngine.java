@@ -3,7 +3,7 @@ package xyz.raymoore.app.madisonsc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import xyz.raymoore.app.madisonsc.bean.WeeklyPicks;
+import xyz.raymoore.app.madisonsc.bean.PicksMessage;
 import xyz.raymoore.app.madisonsc.category.Team;
 import xyz.raymoore.app.madisonsc.db.Pick;
 
@@ -11,12 +11,12 @@ import xyz.raymoore.app.madisonsc.db.Pick;
  * This class assumes an active connection set on the Homes singleton
  */
 public class StorageEngine {
-    public void submitPicks(int year, int week, WeeklyPicks bean) throws JsonProcessingException {
+    public void submitPicks(int year, int week, PicksMessage message) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
 
-        System.out.println(writer.writeValueAsString(bean));
-        for (String pick : bean.getPicks()) {
+        System.out.println(writer.writeValueAsString(message));
+        for (String pick : message.getPicks()) {
             parse(pick);
         }
     }

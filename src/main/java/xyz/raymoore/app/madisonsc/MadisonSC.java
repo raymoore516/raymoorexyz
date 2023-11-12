@@ -6,7 +6,7 @@ import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import xyz.raymoore.Homes;
 import xyz.raymoore.Settings;
-import xyz.raymoore.app.madisonsc.bean.WeeklyPicks;
+import xyz.raymoore.app.madisonsc.bean.PicksMessage;
 import xyz.raymoore.javalin.Routes;
 
 import javax.sql.DataSource;
@@ -44,10 +44,10 @@ public class MadisonSC implements Routes {
 
             int year = Integer.parseInt(ctx.pathParam("year"));
             int week = Integer.parseInt(ctx.pathParam("week"));
-            WeeklyPicks bean = ctx.bodyAsClass(WeeklyPicks.class);
+            PicksMessage message = ctx.bodyAsClass(PicksMessage.class);
 
             StorageEngine engine = new StorageEngine();
-            engine.submitPicks(year, week, bean);
+            engine.submitPicks(year, week, message);
 
             // TODO...
         }
