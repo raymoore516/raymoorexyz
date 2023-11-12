@@ -43,4 +43,14 @@ public class Contestant extends Fauxjo {
     public void setName(String name) {
         this.name = name;
     }
+
+    // ---
+
+    public static class Home extends net.jextra.fauxjo.Home<Contestant> {
+        public static final String SCHEMA = "madisonsc";
+
+        public Home() {
+            super(SCHEMA + ".Contestant", Contestant.class);
+        }
+    }
 }

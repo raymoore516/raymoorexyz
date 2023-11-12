@@ -2,7 +2,7 @@ package xyz.raymoore.app.madisonsc.bean;
 
 import java.util.List;
 
-public class PicksMessage {
+public class PicksRequest {
     private String contestant;  // Matches on contestant name
     private List<String> picks;  // Uses shorthand notation
 

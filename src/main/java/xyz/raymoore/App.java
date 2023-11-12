@@ -11,17 +11,13 @@ import xyz.raymoore.javalin.Routes;
 import java.io.File;
 import java.io.IOException;
 
-public class App implements Routes {
+public class App {
     public static String DEFAULT_PORT = "8080";
 
-    private static App instance;
-
     public static void main(String[] args) throws IOException {
-        instance = new App();
-
         // Load Settings
         File file = new File("src/env/settings.yaml");
-        Settings settings = Settings.load(file);
+        AppSettings settings = AppSettings.load(file);
 
         // Create Javalin
         Javalin app = Javalin.create(App::configure);
@@ -44,11 +40,6 @@ public class App implements Routes {
         // Start Javalin
         int port = Integer.parseInt(settings.getPort() == null ? DEFAULT_PORT : settings.getPort());
         app.start(port);
-    }
-
-    @Override
-    public void register(Javalin app) {
-        app.get("/", ctx -> ctx.html("Hello world"));
     }
 
     // ---

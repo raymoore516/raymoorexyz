@@ -110,4 +110,14 @@ public class Pick {
     public void setResult(Result result) {
         this.result = result;
     }
+
+    // ---
+
+    public static class Home extends net.jextra.fauxjo.Home<Pick> {
+        public static final String SCHEMA = "madisonsc";
+
+        public Home() {
+            super(SCHEMA + ".Pick", Pick.class);
+        }
+    }
 }

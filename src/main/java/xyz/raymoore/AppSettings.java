@@ -8,7 +8,7 @@ import xyz.raymoore.settings.Postgres;
 import java.io.File;
 import java.io.IOException;
 
-public class Settings {
+public class AppSettings {
     @JsonIgnore
     public static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
 
@@ -18,8 +18,8 @@ public class Settings {
 
     // ---
 
-    public static Settings load(File yaml) throws IOException {
-        return YAML_MAPPER.readValue(yaml, Settings.class);
+    public static AppSettings load(File yaml) throws IOException {
+        return YAML_MAPPER.readValue(yaml, AppSettings.class);
     }
 
     public static String read(String value) {

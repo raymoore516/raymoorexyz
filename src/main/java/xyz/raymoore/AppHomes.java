@@ -2,21 +2,17 @@ package xyz.raymoore;
 
 import net.jextra.fauxjo.HomeGroup;
 import xyz.raymoore.db.Session;
-import xyz.raymoore.javalin.Routes;
 
-import java.util.Map;
+public class AppHomes extends HomeGroup {
+    private static AppHomes instance;
 
-public class Homes extends HomeGroup {
-    private static Homes instance;
-    private static Map<Class<? extends Routes>, Homes> instances;
-
-    public Homes() {
+    public AppHomes() {
         addHome(Session.Home.class, new Session.Home());
     }
 
-    public static synchronized Homes use() {
+    public static synchronized AppHomes use() {
         if (instance == null) {
-            instance = new Homes();
+            instance = new AppHomes();
         }
 
         return instance;
