@@ -16,16 +16,15 @@ import xyz.raymoore.javalin.Routes;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class MadisonSC implements Routes {
     private final DataSource ds;
-    private final Engine engine;
 
     // ---
 
     public MadisonSC(AppSettings settings) {
         this.ds = settings.getPostgres().useDataSource();
-        this.engine = new Engine();
     }
 
     public void register(Javalin app) {
@@ -46,40 +45,55 @@ public class MadisonSC implements Routes {
 
     public void submitWeeklyPicks(@NotNull Context ctx) throws Exception {
         try (Connection conn = ds.getConnection()) {
-            Homes homes = new Homes();
-            homes.setConnection(conn);
+            Engine engine = new Engine(conn);
 
             int year = Integer.parseInt(ctx.pathParam("year"));
             int week = Integer.parseInt(ctx.pathParam("week"));
             PicksSubmission submission = ctx.bodyAsClass(PicksSubmission.class);
 
             engine.submitWeeklyPicks(year, week, submission);
-            homes.close();
         }
     }
 
     // ---
 
     public static class Engine {
-        public void submitWeeklyPicks(int year, int week, PicksSubmission submission) throws Exception {
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+        private final Homes homes;
 
-            System.out.println(writer.writeValueAsString(submission));
-            for (String pick : submission.getPicks()) {
-                parseWeeklyPick(pick);
+        public Engine(Connection conn) throws SQLException {
+            this.homes = new Homes(conn);
+        }
+
+        public void setConnection(Connection conn) throws SQLException {
+            this.homes.setConnection(conn);
+        }
+
+        public void submitWeeklyPicks(int year, int week, PicksSubmission submission) throws SQLException {
+            UUID contestantId = new UUID(0, 0);
+            for (String shorthand : submission.getPicks()) {
+                Pick bean = parseWeeklyPick(year, week, shorthand);
+                bean.setContestantId(contestantId);
+                homes.getPickHome().insert(bean);
             }
         }
 
-        private static void parseWeeklyPick(String value) {
+        private static Pick parseWeeklyPick(int year, int week, String value) {
+            // pc[0] = "CLE", "IND", "GB", etc.
+            // pc[1] = "+3.5", "PK", "-7", etc.
+            // pc[2] = "W" or "L" or "T"
             String[] pc = value.split("\\s+");
 
-            // TODO: Remove this section
-            System.out.printf("Team : %s%n", pc[0]);
-            System.out.printf("Spread : %s%n", pc[1]);
-            System.out.printf("Result : %s%n", pc[2]);
+            // Build database object
+            Pick pick = new Pick();
+            pick.setYear(year);
+            pick.setWeek(week);
+            pick.setTeam(Team.find(pc[0]));
+            pick.setFavorite(pc[1].startsWith("+"));  // Ties are false
+            pick.setLine(pc[1].toUpperCase().contains("PK") ? 0
+                    : Double.parseDouble(pc[1].substring(1)));
+            pick.setResult(Result.findByCode(pc[2]));
 
-            Team team = Team.find(pc[0]);
+            return pick;
         }
     }
 
@@ -89,6 +103,19 @@ public class MadisonSC implements Routes {
         public Homes() {
             addHome(Contestant.Home.class, new Contestant.Home());
             addHome(Pick.Home.class, new Pick.Home());
+        }
+
+        public Homes(Connection conn) throws SQLException {
+            this();
+            this.setConnection(conn);
+        }
+
+        public Contestant.Home getContestantHome() {
+            return getHome(Contestant.Home.class);
+        }
+
+        public Pick.Home getPickHome() {
+            return getHome(Pick.Home.class);
         }
     }
 }

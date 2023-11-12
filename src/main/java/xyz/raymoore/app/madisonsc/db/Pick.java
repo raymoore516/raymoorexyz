@@ -17,7 +17,7 @@ public class Pick {
     private Instant entryDate;
 
     @FauxjoField("contestantId")
-    private String contestantId;
+    private UUID contestantId;
 
     @FauxjoField("year")
     private int year;
@@ -55,11 +55,11 @@ public class Pick {
         this.entryDate = entryDate;
     }
 
-    public String getContestantId() {
+    public UUID getContestantId() {
         return contestantId;
     }
 
-    public void setContestantId(String contestantId) {
+    public void setContestantId(UUID contestantId) {
         this.contestantId = contestantId;
     }
 

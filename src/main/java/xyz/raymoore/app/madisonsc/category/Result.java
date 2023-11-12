@@ -11,6 +11,16 @@ public enum Result {
         this.code = code;
     }
 
+    public static Result findByCode(String code) {
+        for (Result result : values()) {
+            if (result.getCode().equals(code)) {
+                return result;
+            }
+        }
+
+        return null;
+    }
+
     public String getCode() {
         return code;
     }
