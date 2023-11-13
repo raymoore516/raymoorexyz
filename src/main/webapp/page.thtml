@@ -1,0 +1,14 @@
+== root
+html
+    head
+        title | $title
+        > css
+        > js
+    body
+        > content
+
+== css
+link rel="stylesheet" href="$path"
+
+== js
+script src="$path" defer

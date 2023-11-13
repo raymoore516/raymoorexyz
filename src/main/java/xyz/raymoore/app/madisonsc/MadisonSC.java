@@ -4,9 +4,11 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import net.jextra.fauxjo.HomeGroup;
 import net.jextra.fauxjo.transaction.Transaction;
+import net.jextra.tucker.tucker.Block;
 import org.jetbrains.annotations.NotNull;
 import xyz.raymoore.AppHomes;
 import xyz.raymoore.AppSettings;
+import xyz.raymoore.Page;
 import xyz.raymoore.app.madisonsc.bean.PicksSubmission;
 import xyz.raymoore.app.madisonsc.category.Result;
 import xyz.raymoore.app.madisonsc.category.Team;
@@ -15,8 +17,10 @@ import xyz.raymoore.app.madisonsc.db.Pick;
 import xyz.raymoore.javalin.Routes;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 public class MadisonSC implements Routes {
     private final DataSource ds;
@@ -34,21 +38,23 @@ public class MadisonSC implements Routes {
 
     // ---
 
-    public void renderWeeklyPicks(@NotNull Context ctx) throws SQLException {
-        try (Connection conn = ds.getConnection()) {
-            AppHomes.use().setConnection(conn);
+    public void renderWeeklyPicks(@NotNull Context ctx) throws SQLException, IOException {
+        int year = Integer.parseInt(ctx.pathParam("year"));
+        int week = Integer.parseInt(ctx.pathParam("week"));
 
-            ctx.html(String.format("The year is %s and the week is %s",
-                            ctx.pathParam("year"), ctx.pathParam("week")));
+        Page page = new Page(String.format("Madison SC: Year %d Week %d", year, week));
+        page.setContent(new Block("Hello"));
+        try (Connection conn = ds.getConnection()) {
+            ctx.html(page.render());
         }
     }
 
     public void submitWeeklyPicks(@NotNull Context ctx) throws Exception {
+        int year = Integer.parseInt(ctx.pathParam("year"));
+        int week = Integer.parseInt(ctx.pathParam("week"));
+
         try (Transaction trans = new Transaction(ds.getConnection())) {
             Engine engine = new Engine(trans.getConnection());
-
-            int year = Integer.parseInt(ctx.pathParam("year"));
-            int week = Integer.parseInt(ctx.pathParam("week"));
             PicksSubmission submission = ctx.bodyAsClass(PicksSubmission.class);
 
             engine.submitWeeklyPicks(year, week, submission);
