@@ -3,8 +3,10 @@ package xyz.raymoore;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.http.staticfiles.Location;
+import net.jextra.fauxjo.HomeGroup;
 import xyz.raymoore.app.connections.Connections;
 import xyz.raymoore.app.madisonsc.MadisonSC;
+import xyz.raymoore.db.Session;
 import xyz.raymoore.javalin.Filter;
 
 import java.io.File;
@@ -45,5 +47,25 @@ public class App {
 
     private static void configure(JavalinConfig config) {
         config.staticFiles.add("src/main/webapp", Location.EXTERNAL);
+    }
+
+    public static class Homes extends HomeGroup {
+        private static Homes instance;
+
+        public Homes() {
+            addHome(Session.Home.class, new Session.Home());
+        }
+
+        public static synchronized Homes use() {
+            if (instance == null) {
+                instance = new Homes();
+            }
+
+            return instance;
+        }
+
+        public Session.Home getSessionHome() {
+            return getHome(Session.Home.class);
+        }
     }
 }

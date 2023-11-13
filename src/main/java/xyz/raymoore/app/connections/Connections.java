@@ -3,7 +3,7 @@ package xyz.raymoore.app.connections;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
-import xyz.raymoore.AppHomes;
+import xyz.raymoore.App;
 import xyz.raymoore.Settings;
 import xyz.raymoore.db.Session;
 import xyz.raymoore.javalin.Filter;
@@ -38,11 +38,11 @@ public class Connections {
 
     public void showPage(@NotNull Context ctx) throws SQLException {
         try (Connection conn = ds.getConnection()) {
-            AppHomes.use().setConnection(conn);
+            App.Homes.use().setConnection(conn);
 
             String cookie = ctx.cookieStore().get(Filter.SESSION_COOKIE_KEY);
             UUID sessionId = UUID.fromString(cookie);
-            Session session = AppHomes.use().getSessionHome().find(sessionId);
+            Session session = App.Homes.use().getSessionHome().find(sessionId);
 
             Instant entryDate = session.getEntryDate();
             long seconds = Instant.now().getEpochSecond() - entryDate.getEpochSecond();
