@@ -31,8 +31,8 @@ public class Pick {
     @FauxjoField("team")
     private Team team;
 
-    @FauxjoField("favorite")
-    private boolean favorite;
+    @FauxjoField("underdog")
+    private boolean underdog;
 
     @FauxjoField("line")
     private double line;
@@ -96,12 +96,12 @@ public class Pick {
         this.team = team;
     }
 
-    public boolean isFavorite() {
-        return favorite;
+    public boolean isUnderdog() {
+        return underdog;
     }
 
-    public void setFavorite(boolean favorite) {
-        this.favorite = favorite;
+    public void setUnderdog(boolean underdog) {
+        this.underdog = underdog;
     }
 
     public double getLine() {
@@ -130,10 +130,20 @@ public class Pick {
         }
 
         public List<Pick> findByYearAndWeek(int year, int week) throws SQLException {
-            String clause = "where year=? and week=? order by entryDate";
+            String clause = "WHERE year=? AND week=? ORDER BY entryDate";
             PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
             statement.setInt(1, year);
             statement.setInt(2, week);
+
+            return getList(statement.executeQuery());
+        }
+
+        public List<Pick> findByContestantYearWeek(Contestant c, int year, int week) throws SQLException {
+            String clause = "WHERE contestantId=uuid(?) AND year=? AND week=? ORDER BY entryDate";
+            PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
+            statement.setObject(1, c.getId());
+            statement.setInt(2, year);
+            statement.setInt(3, week);
 
             return getList(statement.executeQuery());
         }

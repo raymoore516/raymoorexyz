@@ -15,7 +15,7 @@ create table if not exists madisonsc.Pick (
     year int not null,
     week int not null,
     team text not null,
-    favorite boolean,
+    underdog boolean,
     line numeric(3,1) not null,
     result text not null
 );

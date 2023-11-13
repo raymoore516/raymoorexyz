@@ -48,12 +48,9 @@ public class MadisonSC implements Routes {
         int week = Integer.parseInt(ctx.pathParam("week"));
 
         try (Connection conn = ds.getConnection()) {
-            Homes homes = new Homes(conn);
-            Pages pages = new Pages();
+            Pages pages = new Pages(conn);
+            Page page = pages.buildWeeklyPicks(year, week);
 
-            String title = String.format("Madison SC: Year %d, Week %d", year, week);
-            List<Pick> picks = homes.getPickHome().findByYearAndWeek(year, week);
-            Page page = pages.buildWeeklyPicks(title, picks);
             ctx.html(page.render());
         }
     }
@@ -63,11 +60,13 @@ public class MadisonSC implements Routes {
         int week = Integer.parseInt(ctx.pathParam("week"));
 
         try (Transaction trans = new Transaction(ds.getConnection())) {
-            Engine engine = new Engine(trans.getConnection());
             Submission submission = ctx.bodyAsClass(Submission.class);
 
+            Engine engine = new Engine(trans.getConnection());
             engine.submitWeeklyPicks(year, week, submission);
             trans.commit();
+
+            ctx.json("{\"success\" : true}");
         }
     }
 
@@ -126,7 +125,7 @@ public class MadisonSC implements Routes {
             pick.setYear(year);
             pick.setWeek(week);
             pick.setTeam(Team.find(pc[0]));
-            pick.setFavorite(pc[1].startsWith("+"));  // Ties are false
+            pick.setUnderdog(pc[1].startsWith("+"));  // Ties are false
             pick.setLine(pc[1].toUpperCase().contains("PK") ? 0
                     : Double.parseDouble(pc[1].substring(1)));  // Handle "PK" for pick em
             pick.setResult(Result.findByCode(pc[2]));
@@ -138,27 +137,57 @@ public class MadisonSC implements Routes {
     // ---
 
     public static class Pages {
+        private final Homes homes;
         private final Tucker tucker;
 
-        public Pages() throws IOException {
+        public Pages(Connection conn) throws SQLException, IOException {
+            this.homes = new Homes(conn);
             this.tucker = new Tucker(new File(TUCK));
         }
 
-        public Page buildWeeklyPicks(String title, List<Pick> picks) throws IOException {
-            Page page = new Page(title);
+        public Page buildWeeklyPicks(int year, int week) throws IOException, SQLException {
+            Page page = new Page(String.format("MSC Year %d, Week %d", year, week));
             page.addStylesheet(CSS);
             page.addScript(JS);
 
             Block content = tucker.buildBlock("content");
             page.setContent(content);
 
-            for (Pick p : picks) {
-                Block pick = tucker.buildBlock("pick");
-                pick.setVariable("foo", p.toString());
-                content.insert("pick", pick);
+            List<Contestant> contestants = homes.getContestantHome().findAll();
+            for (Contestant c : contestants) {
+                Block contestant = buildWeeklyPicks(c, year, week);
+                content.insert("contestant", contestant);
             }
 
             return page;
+        }
+
+        private Block buildWeeklyPicks(Contestant c, int year, int week) throws SQLException {
+            Block contestant = tucker.buildBlock("contestant");
+            contestant.setVariable("name", c.getName());
+
+            List<Pick> picks = homes.getPickHome().findByContestantYearWeek(c, year, week);
+            if (picks.size() == 0) {
+                Block message = tucker.buildBlock("message");
+                message.setVariable("message", String.format("No picks found [year: %d] [week: %d]", year, week));
+                contestant.insert("message", message);
+                return contestant;
+            }
+
+            Block table = tucker.buildBlock("table");
+            contestant.insert("table", table);
+            for (Pick p : picks) {
+                Block row = tucker.buildBlock("table-row");
+                table.insert("row", row);
+
+                String spread = p.getLine() == 0.0 ? "PK"
+                        : String.format("%s%s", p.isUnderdog() ? "+" : "-", p.getLine());
+                row.setVariable("team", p.getTeam().name());
+                row.setVariable("spread", spread);
+                row.setVariable("result", p.getResult().name().toUpperCase());
+            }
+
+            return contestant;
         }
     }
 }

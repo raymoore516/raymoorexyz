@@ -1,0 +1,9 @@
+.current-week {
+    display: flex;
+    gap: 10px;
+}
+
+.contestant {
+    border: 1px solid gray;
+    padding: 10px;
+}

@@ -7,6 +7,7 @@ import net.jextra.fauxjo.bean.FauxjoPrimaryKey;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public class Contestant extends Fauxjo {
@@ -61,6 +62,13 @@ public class Contestant extends Fauxjo {
             statement.setString(1, name.toLowerCase());
 
             return getUnique(statement.executeQuery());
+        }
+
+        public List<Contestant> findAll() throws SQLException {
+            String clause = "order by entryDate";
+            PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
+
+            return getList(statement.executeQuery());
         }
     }
 }

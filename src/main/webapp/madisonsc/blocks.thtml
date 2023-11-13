@@ -2,7 +2,34 @@
 div#content
     h1 | $title
     div.current-week
-        > pick
+        > contestant
+    div.current-year
+        > summary
 
-== pick
-p | $foo
+== contestant
+div#$id.contestant
+    h2 | $name
+    > message
+    > table
+
+== message
+p.$class | $message
+
+== table
+table.weekly-picks
+    thead
+        tr
+            td | Logo
+            td | Team
+            td | Spread
+            td | Result
+    tbody
+        > row
+
+== table-row
+tr
+    td
+        img src="$src" width="50px" height="50px"
+    td | $team
+    td | $spread
+    td | $result
