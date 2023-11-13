@@ -8,8 +8,10 @@ import xyz.raymoore.app.madisonsc.category.Team;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Pick {
     @FauxjoPrimaryKey

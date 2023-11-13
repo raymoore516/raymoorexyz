@@ -11,6 +11,7 @@ div#$id.contestant
     h2 | $name
     > message
     > table
+    > summary
 
 == message
 p.$class | $message
@@ -33,3 +34,8 @@ tr
     td | $team
     td | $spread
     td | $result
+
+== weekly-summary
+div.summary.weekly-summary
+    strong | Week $week Record:
+    span | $record

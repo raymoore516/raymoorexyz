@@ -7,3 +7,7 @@
     border: 1px solid gray;
     padding: 10px;
 }
+
+.contestant .summary {
+    margin-top: 1ch;
+}

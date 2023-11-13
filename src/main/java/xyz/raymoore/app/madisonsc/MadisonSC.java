@@ -155,14 +155,14 @@ public class MadisonSC implements Routes {
 
             List<Contestant> contestants = homes.getContestantHome().findAll();
             for (Contestant c : contestants) {
-                Block contestant = buildWeeklyPicks(c, year, week);
+                Block contestant = buildWeeklyPicks(year, week, c);
                 content.insert("contestant", contestant);
             }
 
             return page;
         }
 
-        private Block buildWeeklyPicks(Contestant c, int year, int week) throws SQLException {
+        private Block buildWeeklyPicks(int year, int week, Contestant c) throws SQLException {
             Block contestant = tucker.buildBlock("contestant");
             contestant.setVariable("name", c.getName());
 
@@ -186,6 +186,11 @@ public class MadisonSC implements Routes {
                 row.setVariable("spread", spread);
                 row.setVariable("result", p.getResult().name().toUpperCase());
             }
+
+            Block weekly = tucker.buildBlock("weekly-summary");
+            weekly.setVariable("week", String.valueOf(week));
+            weekly.setVariable("record", Result.calculateRecord(picks));
+            contestant.insert("summary", weekly);
 
             return contestant;
         }
