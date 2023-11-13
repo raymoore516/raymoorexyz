@@ -128,7 +128,7 @@ public class MadisonSC implements Routes {
             pick.setTeam(Team.find(pc[0]));
             pick.setFavorite(pc[1].startsWith("+"));  // Ties are false
             pick.setLine(pc[1].toUpperCase().contains("PK") ? 0
-                    : Double.parseDouble(pc[1].substring(1)));
+                    : Double.parseDouble(pc[1].substring(1)));  // Handle "PK" for pick em
             pick.setResult(Result.findByCode(pc[2]));
 
             return pick;
