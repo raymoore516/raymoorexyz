@@ -131,11 +131,11 @@ public class Pick {
             super(SCHEMA + ".Pick", Pick.class);
         }
 
-        public List<Pick> findByYearAndWeek(int year, int week) throws SQLException {
-            String clause = "WHERE year=? AND week=? ORDER BY entryDate";
+        public List<Pick> findByContestantYear(Contestant c, int year) throws SQLException {
+            String clause = "WHERE contestantId=uuid(?) AND year=? ORDER BY entryDate";
             PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
-            statement.setInt(1, year);
-            statement.setInt(2, week);
+            statement.setObject(1, c.getId());
+            statement.setInt(2, year);
 
             return getList(statement.executeQuery());
         }

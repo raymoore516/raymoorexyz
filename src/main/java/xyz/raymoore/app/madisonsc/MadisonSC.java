@@ -49,7 +49,7 @@ public class MadisonSC implements Routes {
 
         try (Connection conn = ds.getConnection()) {
             Pages pages = new Pages(conn);
-            Page page = pages.buildWeeklyPicks(year, week);
+            Page page = pages.buildWeekly(year, week);
 
             ctx.html(page.render());
         }
@@ -145,7 +145,7 @@ public class MadisonSC implements Routes {
             this.tucker = new Tucker(new File(TUCK));
         }
 
-        public Page buildWeeklyPicks(int year, int week) throws IOException, SQLException {
+        public Page buildWeekly(int year, int week) throws IOException, SQLException {
             Page page = new Page(String.format("MSC Year %d, Week %d", year, week));
             page.addStylesheet(CSS);
             page.addScript(JS);
@@ -155,42 +155,48 @@ public class MadisonSC implements Routes {
 
             List<Contestant> contestants = homes.getContestantHome().findAll();
             for (Contestant c : contestants) {
-                Block contestant = buildWeeklyPicks(year, week, c);
+                Block contestant = buildWeeklyContestant(year, week, c);
                 content.insert("contestant", contestant);
             }
 
             return page;
         }
 
-        private Block buildWeeklyPicks(int year, int week, Contestant c) throws SQLException {
+        private Block buildWeeklyContestant(int year, int week, Contestant c) throws SQLException {
             Block contestant = tucker.buildBlock("contestant");
             contestant.setVariable("name", c.getName());
 
-            List<Pick> picks = homes.getPickHome().findByContestantYearWeek(c, year, week);
-            if (picks.size() == 0) {
+            List<Pick> weekPicks = homes.getPickHome().findByContestantYearWeek(c, year, week);
+            if (weekPicks.size() == 0) {
                 Block message = tucker.buildBlock("message");
-                message.setVariable("message", String.format("No picks found [year: %d] [week: %d]", year, week));
+                message.setVariable("message", "No picks found");
                 contestant.insert("message", message);
-                return contestant;
-            }
+            } else {
+                Block table = tucker.buildBlock("table");
+                contestant.insert("table", table);
+                for (Pick p : weekPicks) {
+                    Block row = tucker.buildBlock("table-row");
+                    table.insert("row", row);
 
-            Block table = tucker.buildBlock("table");
-            contestant.insert("table", table);
-            for (Pick p : picks) {
-                Block row = tucker.buildBlock("table-row");
-                table.insert("row", row);
-
-                String spread = p.getLine() == 0.0 ? "PK"
-                        : String.format("%s%s", p.isUnderdog() ? "+" : "-", p.getLine());
-                row.setVariable("team", p.getTeam().name());
-                row.setVariable("spread", spread);
-                row.setVariable("result", p.getResult().name().toUpperCase());
+                    String spread = p.getLine() == 0.0 ? "PK"
+                            : String.format("%s%s", p.isUnderdog() ? "+" : "-", p.getLine());
+                    row.setVariable("team", p.getTeam().name());
+                    row.setVariable("spread", spread);
+                    row.setVariable("result", p.getResult().name().toUpperCase());
+                }
             }
 
             Block weekly = tucker.buildBlock("weekly-summary");
             weekly.setVariable("week", String.valueOf(week));
-            weekly.setVariable("record", Result.calculateRecord(picks));
+            weekly.setVariable("record", Result.calculateRecord(weekPicks));
             contestant.insert("summary", weekly);
+
+            List<Pick> yearPicks = homes.getPickHome().findByContestantYear(c, year);
+
+            Block yearly = tucker.buildBlock("yearly-summary");
+            yearly.setVariable("year", String.valueOf(year));
+            yearly.setVariable("record", Result.calculateRecord(yearPicks));
+            contestant.insert("summary", yearly);
 
             return contestant;
         }

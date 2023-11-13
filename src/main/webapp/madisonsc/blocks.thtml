@@ -39,3 +39,8 @@ tr
 div.summary.weekly-summary
     strong | Week $week Record:
     span | $record
+
+== yearly-summary
+div.summary.yearly-summary
+    strong | Year $year Record:
+    span | $record
