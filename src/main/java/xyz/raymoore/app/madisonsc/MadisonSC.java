@@ -9,7 +9,7 @@ import net.jextra.tucker.tucker.Tucker;
 import org.jetbrains.annotations.NotNull;
 import xyz.raymoore.Settings;
 import xyz.raymoore.Page;
-import xyz.raymoore.app.madisonsc.bean.Submission;
+import xyz.raymoore.app.madisonsc.api.Submission;
 import xyz.raymoore.app.madisonsc.category.Result;
 import xyz.raymoore.app.madisonsc.category.Team;
 import xyz.raymoore.app.madisonsc.db.Contestant;

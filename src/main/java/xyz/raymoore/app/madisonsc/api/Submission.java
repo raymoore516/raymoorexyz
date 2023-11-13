@@ -1,4 +1,4 @@
-package xyz.raymoore.app.madisonsc.bean;
+package xyz.raymoore.app.madisonsc.api;
 
 import java.util.List;
 
