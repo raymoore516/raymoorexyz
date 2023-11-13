@@ -184,9 +184,13 @@ public class MadisonSC implements Routes {
                     Block row = tucker.buildBlock("table-row");
                     table.insert("row", row);
 
+                    String team = p.getTeam().name();
+                    String src = String.format("/madisonsc/img/logo/%s.gif", team);
                     String spread = p.getLine() == 0.0 ? "PK"
                             : String.format("%s%s", p.isUnderdog() ? "+" : "-", p.getLine());
-                    row.setVariable("team", p.getTeam().name());
+
+                    row.setVariable("src", src);
+                    row.setVariable("team", team);
                     row.setVariable("spread", spread);
                     row.setVariable("result", p.getResult().name().toUpperCase());
                 }
