@@ -6,10 +6,9 @@ import net.jextra.fauxjo.HomeGroup;
 import net.jextra.fauxjo.transaction.Transaction;
 import net.jextra.tucker.tucker.Block;
 import org.jetbrains.annotations.NotNull;
-import xyz.raymoore.AppHomes;
 import xyz.raymoore.AppSettings;
 import xyz.raymoore.Page;
-import xyz.raymoore.app.madisonsc.bean.PicksSubmission;
+import xyz.raymoore.app.madisonsc.bean.Submission;
 import xyz.raymoore.app.madisonsc.category.Result;
 import xyz.raymoore.app.madisonsc.category.Team;
 import xyz.raymoore.app.madisonsc.db.Contestant;
@@ -20,7 +19,6 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
 public class MadisonSC implements Routes {
     private final DataSource ds;
@@ -32,8 +30,8 @@ public class MadisonSC implements Routes {
     }
 
     public void register(Javalin app) {
-        app.get("madisonsc/{year}/{week}", this::renderWeeklyPicks);
-        app.post("madisonsc/{year}/{week}", this::submitWeeklyPicks);
+        app.get("madisonsc/picks/{year}/{week}", this::renderWeeklyPicks);
+        app.post("madisonsc/picks/{year}/{week}", this::submitWeeklyPicks);
     }
 
     // ---
@@ -55,7 +53,7 @@ public class MadisonSC implements Routes {
 
         try (Transaction trans = new Transaction(ds.getConnection())) {
             Engine engine = new Engine(trans.getConnection());
-            PicksSubmission submission = ctx.bodyAsClass(PicksSubmission.class);
+            Submission submission = ctx.bodyAsClass(Submission.class);
 
             engine.submitWeeklyPicks(year, week, submission);
             trans.commit();
@@ -71,7 +69,7 @@ public class MadisonSC implements Routes {
             this.homes = new Homes(conn);
         }
 
-        public void submitWeeklyPicks(int year, int week, PicksSubmission submission) throws SQLException {
+        public void submitWeeklyPicks(int year, int week, Submission submission) throws SQLException {
             Contestant contestant = homes.getContestantHome().findByName(submission.getContestant());
             if (contestant == null) {
                 throw new SQLException("Contestant not found");
