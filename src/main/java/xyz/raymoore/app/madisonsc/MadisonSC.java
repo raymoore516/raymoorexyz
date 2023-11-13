@@ -29,11 +29,13 @@ public class MadisonSC implements Routes {
     public static final String JS = "/madisonsc/script.js";
 
     private final DataSource ds;
+    private final String secret;
 
     // ---
 
     public MadisonSC(Settings settings) throws IOException {
         this.ds = settings.getPostgres().useDataSource();
+        this.secret = settings.getSecret();
     }
 
     public void register(Javalin app) {
@@ -56,6 +58,10 @@ public class MadisonSC implements Routes {
     }
 
     public void submitWeeklyPicks(@NotNull Context ctx) throws Exception {
+        if (ctx.header("api-secret") == null || !secret.equals(ctx.header("api-secret"))) {
+            throw new Exception("Invalid API secret");
+        }
+
         int year = Integer.parseInt(ctx.pathParam("year"));
         int week = Integer.parseInt(ctx.pathParam("week"));
 
