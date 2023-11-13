@@ -5,13 +5,16 @@ import net.jextra.fauxjo.bean.FauxjoPrimaryKey;
 import xyz.raymoore.app.madisonsc.category.Result;
 import xyz.raymoore.app.madisonsc.category.Team;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public class Pick {
     @FauxjoPrimaryKey
     @FauxjoField(value = "pickId", defaultable = true)
-    private UUID pickId;
+    private UUID id;
 
     @FauxjoField(value = "entryDate", defaultable = true)
     private Instant entryDate;
@@ -39,12 +42,18 @@ public class Pick {
 
     // ---
 
-    public UUID getPickId() {
-        return pickId;
+    @Override
+    public String toString() {
+        return String.format("%s [year: %d] [week: %d] [team: %s] [id: %s]",
+                this.getClass().getSimpleName(), year, week, team, id);
     }
 
-    public void setPickId(UUID pickId) {
-        this.pickId = pickId;
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public Instant getEntryDate() {
@@ -118,6 +127,15 @@ public class Pick {
 
         public Home() {
             super(SCHEMA + ".Pick", Pick.class);
+        }
+
+        public List<Pick> findByYearAndWeek(int year, int week) throws SQLException {
+            String clause = "where year=? and week=? order by entryDate";
+            PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
+            statement.setInt(1, year);
+            statement.setInt(2, week);
+
+            return getList(statement.executeQuery());
         }
     }
 }

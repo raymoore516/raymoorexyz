@@ -4,7 +4,7 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import xyz.raymoore.AppHomes;
-import xyz.raymoore.AppSettings;
+import xyz.raymoore.Settings;
 import xyz.raymoore.db.Session;
 import xyz.raymoore.javalin.Filter;
 
@@ -22,7 +22,7 @@ public class Connections {
 
     // ---
 
-    public Connections(AppSettings settings) {
+    public Connections(Settings settings) {
         this.ds = settings.getPostgres().useDataSource();
         this.secret = settings.getSecret();
     }

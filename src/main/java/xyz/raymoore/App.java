@@ -16,7 +16,7 @@ public class App {
     public static void main(String[] args) throws IOException {
         // Load Settings
         File file = new File("src/env/settings.yaml");
-        AppSettings settings = AppSettings.load(file);
+        Settings settings = Settings.load(file);
 
         // Create Javalin
         Javalin app = Javalin.create(App::configure);

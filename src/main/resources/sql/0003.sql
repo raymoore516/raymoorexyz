@@ -25,3 +25,4 @@ create index if not exists Pick_year on madisonsc.Pick(year);
 create index if not exists Pick_week on madisonsc.Pick(week);
 create index if not exists Pick_team on madisonsc.Pick(team);
 create index if not exists Pick_result on madisonsc.Pick(result);
+create unique index if not exists Pick_unique on madisonsc.Pick(contestantId, year, week, team);

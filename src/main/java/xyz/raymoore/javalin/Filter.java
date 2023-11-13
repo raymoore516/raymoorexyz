@@ -3,7 +3,7 @@ package xyz.raymoore.javalin;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import xyz.raymoore.AppHomes;
-import xyz.raymoore.AppSettings;
+import xyz.raymoore.Settings;
 import xyz.raymoore.db.Session;
 
 import javax.sql.DataSource;
@@ -16,7 +16,7 @@ public class Filter {
 
     private final DataSource ds;
 
-    public Filter(AppSettings settings) {
+    public Filter(Settings settings) {
         this.ds = settings.getPostgres().useDataSource();
     }
 

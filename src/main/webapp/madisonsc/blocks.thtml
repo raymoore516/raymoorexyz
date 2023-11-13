@@ -1,0 +1,8 @@
+== content
+div#content
+    h1 | $title
+    div.current-week
+        > pick
+
+== pick
+p | $foo

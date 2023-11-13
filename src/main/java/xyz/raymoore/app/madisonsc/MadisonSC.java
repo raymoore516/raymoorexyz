@@ -5,8 +5,9 @@ import io.javalin.http.Context;
 import net.jextra.fauxjo.HomeGroup;
 import net.jextra.fauxjo.transaction.Transaction;
 import net.jextra.tucker.tucker.Block;
+import net.jextra.tucker.tucker.Tucker;
 import org.jetbrains.annotations.NotNull;
-import xyz.raymoore.AppSettings;
+import xyz.raymoore.Settings;
 import xyz.raymoore.Page;
 import xyz.raymoore.app.madisonsc.bean.Submission;
 import xyz.raymoore.app.madisonsc.category.Result;
@@ -16,16 +17,22 @@ import xyz.raymoore.app.madisonsc.db.Pick;
 import xyz.raymoore.javalin.Routes;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 public class MadisonSC implements Routes {
+    public static final String TUCK = "src/main/webapp/madisonsc/blocks.thtml";
+    public static final String CSS = "/madisonsc/style.css";
+    public static final String JS = "/madisonsc/script.js";
+
     private final DataSource ds;
 
     // ---
 
-    public MadisonSC(AppSettings settings) {
+    public MadisonSC(Settings settings) throws IOException {
         this.ds = settings.getPostgres().useDataSource();
     }
 
@@ -40,9 +47,13 @@ public class MadisonSC implements Routes {
         int year = Integer.parseInt(ctx.pathParam("year"));
         int week = Integer.parseInt(ctx.pathParam("week"));
 
-        Page page = new Page(String.format("Madison SC: Year %d Week %d", year, week));
-        page.setContent(new Block("Hello"));
         try (Connection conn = ds.getConnection()) {
+            Homes homes = new Homes(conn);
+            Pages pages = new Pages();
+
+            String title = String.format("Madison SC: Year %d, Week %d", year, week);
+            List<Pick> picks = homes.getPickHome().findByYearAndWeek(year, week);
+            Page page = pages.buildWeeklyPicks(title, picks);
             ctx.html(page.render());
         }
     }
@@ -57,6 +68,28 @@ public class MadisonSC implements Routes {
 
             engine.submitWeeklyPicks(year, week, submission);
             trans.commit();
+        }
+    }
+
+    // ---
+
+    public static class Homes extends HomeGroup {
+        public Homes() {
+            addHome(Contestant.Home.class, new Contestant.Home());
+            addHome(Pick.Home.class, new Pick.Home());
+        }
+
+        public Homes(Connection conn) throws SQLException {
+            this();
+            this.setConnection(conn);
+        }
+
+        public Contestant.Home getContestantHome() {
+            return getHome(Contestant.Home.class);
+        }
+
+        public Pick.Home getPickHome() {
+            return getHome(Pick.Home.class);
         }
     }
 
@@ -104,23 +137,28 @@ public class MadisonSC implements Routes {
 
     // ---
 
-    public static class Homes extends HomeGroup {
-        public Homes() {
-            addHome(Contestant.Home.class, new Contestant.Home());
-            addHome(Pick.Home.class, new Pick.Home());
+    public static class Pages {
+        private final Tucker tucker;
+
+        public Pages() throws IOException {
+            this.tucker = new Tucker(new File(TUCK));
         }
 
-        public Homes(Connection conn) throws SQLException {
-            this();
-            this.setConnection(conn);
-        }
+        public Page buildWeeklyPicks(String title, List<Pick> picks) throws IOException {
+            Page page = new Page(title);
+            page.addStylesheet(CSS);
+            page.addScript(JS);
 
-        public Contestant.Home getContestantHome() {
-            return getHome(Contestant.Home.class);
-        }
+            Block content = tucker.buildBlock("content");
+            page.setContent(content);
 
-        public Pick.Home getPickHome() {
-            return getHome(Pick.Home.class);
+            for (Pick p : picks) {
+                Block pick = tucker.buildBlock("pick");
+                pick.setVariable("foo", p.toString());
+                content.insert("pick", pick);
+            }
+
+            return page;
         }
     }
 }
