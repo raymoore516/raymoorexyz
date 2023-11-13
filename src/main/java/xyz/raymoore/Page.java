@@ -46,7 +46,7 @@ public class Page {
     }
 
     public String render() {
-        root.insert("content", content);
+        root.insert("content", content == null ? new Block() : content);
 
         return root.toString();
     }
