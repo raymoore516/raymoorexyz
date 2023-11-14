@@ -42,5 +42,5 @@ div.summary.weekly-summary
 
 == yearly-summary
 div.summary.yearly-summary
-    strong | Year $year Record:
+    strong | Cumulative Record:
     span | $record

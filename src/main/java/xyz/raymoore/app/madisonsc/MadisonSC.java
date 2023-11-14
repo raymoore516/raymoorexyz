@@ -202,10 +202,10 @@ public class MadisonSC implements Routes {
             weekly.setVariable("record", Result.calculateRecord(weekPicks));
             contestant.insert("summary", weekly);
 
-            List<Pick> yearPicks = homes.getPickHome().findByContestantYear(c, year);
+            List<Pick> yearPicks = homes.getPickHome().findByContestantYear(c, year)
+                    .stream().filter(p -> p.getWeek() <= week).toList();  // Filter "future" picks for "this" week
 
             Block yearly = tucker.buildBlock("yearly-summary");
-            yearly.setVariable("year", String.valueOf(year));
             yearly.setVariable("record", Result.calculateRecord(yearPicks));
             contestant.insert("summary", yearly);
 
