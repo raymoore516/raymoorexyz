@@ -1,6 +1,7 @@
 package xyz.raymoore.app.madisonsc;
 
 import io.javalin.Javalin;
+import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import net.jextra.fauxjo.HomeGroup;
 import net.jextra.fauxjo.transaction.Transaction;
@@ -59,7 +60,7 @@ public class MadisonSC implements Routes {
 
     public void submitWeeklyPicks(@NotNull Context ctx) throws Exception {
         if (ctx.header("api-secret") == null || !secret.equals(ctx.header("api-secret"))) {
-            throw new Exception("Invalid API secret");
+            throw new BadRequestResponse("Invalid API secret");
         }
 
         int year = Integer.parseInt(ctx.pathParam("year"));
@@ -110,7 +111,7 @@ public class MadisonSC implements Routes {
         public void submitWeeklyPicks(int year, int week, Submission submission) throws SQLException {
             Contestant contestant = homes.getContestantHome().findByName(submission.getContestant());
             if (contestant == null) {
-                throw new SQLException("Contestant not found");
+                throw new BadRequestResponse("Contestant not found");
             }
 
             for (String shorthand : submission.getPicks()) {
