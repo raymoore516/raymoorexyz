@@ -3,8 +3,8 @@ div#content
     h1 | $title
     div.current-week
         > contestant
-    div.current-year
-        > summary
+    div.pagination
+        > page-button
 
 == contestant
 div#$id.contestant
@@ -15,6 +15,10 @@ div#$id.contestant
 
 == message
 p.$class | $message
+
+== page-button
+div.page-button
+    a href="$href" | $num
 
 == table
 table.weekly-picks

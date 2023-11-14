@@ -166,6 +166,14 @@ public class MadisonSC implements Routes {
                 content.insert("contestant", contestant);
             }
 
+            for (int num = 1; num < 19; num++) {
+                String href = String.format("/madisonsc/picks/%d/%d", year, num);
+                Block pageButton = tucker.buildBlock("page-button");
+                pageButton.setVariable("href", href);
+                pageButton.setVariable("num", String.valueOf(num));
+                content.insert("page-button", pageButton);
+            }
+
             return page;
         }
 
