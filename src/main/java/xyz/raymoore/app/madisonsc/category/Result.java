@@ -33,6 +33,10 @@ public enum Result {
         int wins = 0, losses = 0, ties = 0;
 
         for (Pick pick : picks) {
+            if (pick.getResult() == null) {
+                continue;  // "TBD" game
+            }
+
             switch (pick.getResult()) {
                 case win -> wins++;
                 case loss -> losses++;

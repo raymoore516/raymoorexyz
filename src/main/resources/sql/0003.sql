@@ -17,7 +17,7 @@ create table if not exists madisonsc.Pick (
     team text not null,
     underdog boolean,
     line numeric(3,1) not null,
-    result text not null
+    result text
 );
 
 create index if not exists Pick_contestantId on madisonsc.Pick(contestantId);

@@ -201,7 +201,7 @@ public class MadisonSC implements Routes {
                     row.setVariable("src", src);
                     row.setVariable("team", team);
                     row.setVariable("spread", spread);
-                    row.setVariable("result", p.getResult().name().toUpperCase());
+                    row.setVariable("result", p.getResult() == null ? "TBD" : p.getResult().name().toUpperCase());
                 }
             }
 
