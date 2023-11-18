@@ -15,7 +15,7 @@ import java.util.UUID;
 public class Game extends Fauxjo {
     @FauxjoPrimaryKey
     @FauxjoField("gameId")
-    private UUID gameId;
+    private UUID id;
 
     @FauxjoField("sessionId")
     private UUID sessionId;
@@ -49,12 +49,12 @@ public class Game extends Fauxjo {
         this.dataEncoded = Base64.getEncoder().encodeToString(bytes);
     }
 
-    public UUID getGameId() {
-        return gameId;
+    public UUID getId() {
+        return id;
     }
 
-    public void setGameId(UUID gameId) {
-        this.gameId = gameId;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public UUID getSessionId() {
