@@ -1,5 +1,8 @@
 package xyz.raymoore;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.http.staticfiles.Location;
@@ -14,6 +17,10 @@ import java.io.IOException;
 
 public class App {
     public static String DEFAULT_PORT = "8080";
+
+    public static ObjectMapper JACKSON_MAPPER = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .registerModule(new JavaTimeModule());
 
     public static void main(String[] args) throws IOException {
         // Load Settings
