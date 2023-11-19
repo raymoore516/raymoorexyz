@@ -132,4 +132,14 @@ public class Game extends Fauxjo {
             this.oneAway = oneAway;
         }
     }
+
+    // ---
+
+    public static class Home extends net.jextra.fauxjo.Home<Game> {
+        public static String SCHEMA = "connections";
+
+        public Home() {
+            super(String.format("%s.%s", SCHEMA, "Game"), Game.class);
+        }
+    }
 }

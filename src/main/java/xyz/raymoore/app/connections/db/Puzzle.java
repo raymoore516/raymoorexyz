@@ -39,11 +39,11 @@ public class Puzzle extends Fauxjo {
         public static String SCHEMA = "connections";
 
         public Home() {
-            super(String.format("%s.%s", SCHEMA, "Game"), Puzzle.class);
+            super(String.format("%s.%s", SCHEMA, "Puzzle"), Puzzle.class);
         }
 
         public Puzzle find(UUID id) throws SQLException {
-            String sql = buildBasicSelect("where id=uuid(?)");
+            String sql = buildBasicSelect("where puzzleId=uuid(?)");
             PreparedStatement statement = prepareStatement(sql);
             statement.setObject(1, id);
 

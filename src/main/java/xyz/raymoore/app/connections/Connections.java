@@ -2,9 +2,13 @@ package xyz.raymoore.app.connections;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import net.jextra.fauxjo.HomeGroup;
 import org.jetbrains.annotations.NotNull;
 import xyz.raymoore.App;
 import xyz.raymoore.Settings;
+import xyz.raymoore.app.connections.db.Game;
+import xyz.raymoore.app.connections.db.Group;
+import xyz.raymoore.app.connections.db.Puzzle;
 import xyz.raymoore.db.Session;
 import xyz.raymoore.javalin.Filter;
 
@@ -59,6 +63,43 @@ public class Connections {
                     ctx.json(String.format("{\"uuid\":\"%s\"}", rs.getString(1)));
                 }
             }
+        }
+    }
+
+    // ---
+
+    public static class Homes extends HomeGroup {
+        public Homes() {
+            addHome(Game.Home.class, new Game.Home());
+            addHome(Group.Home.class, new Group.Home());
+            addHome(Puzzle.Home.class, new Puzzle.Home());
+        }
+
+        public Homes(Connection conn) throws SQLException {
+            this();
+            this.setConnection(conn);
+        }
+
+        public Game.Home getGameHome() {
+            return getHome(Game.Home.class);
+        }
+
+        public Group.Home getGroupHome() {
+            return getHome(Group.Home.class);
+        }
+
+        public Puzzle.Home getPuzzleHome() {
+            return getHome(Puzzle.Home.class);
+        }
+    }
+
+    // ---
+
+    public static class Engine {
+        private final Homes homes;
+
+        public Engine(Connection conn) throws SQLException {
+            this.homes = new Homes(conn);
         }
     }
 }
