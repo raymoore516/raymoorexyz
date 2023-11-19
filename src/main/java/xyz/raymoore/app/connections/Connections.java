@@ -48,9 +48,7 @@ public class Connections {
             List<Group> groups = homes.getGroupHome().findByPuzzle(puzzle);
 
             List<String> words = new ArrayList<>();
-            groups.forEach(group -> {
-                words.addAll(List.of(group.getWords()));
-            });
+            groups.forEach(group -> words.addAll(List.of(group.getWords())));
 
             StringBuilder sb = new StringBuilder("The words are: ");
             for (int i = 0; i < words.size(); i++) {
