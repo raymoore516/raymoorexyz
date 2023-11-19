@@ -3,7 +3,6 @@ package xyz.raymoore.app.connections.db;
 import net.jextra.fauxjo.bean.Fauxjo;
 import net.jextra.fauxjo.bean.FauxjoField;
 import net.jextra.fauxjo.bean.FauxjoPrimaryKey;
-import xyz.raymoore.Page;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
