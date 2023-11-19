@@ -9,16 +9,14 @@ import xyz.raymoore.Settings;
 import xyz.raymoore.app.connections.db.Game;
 import xyz.raymoore.app.connections.db.Group;
 import xyz.raymoore.app.connections.db.Puzzle;
-import xyz.raymoore.db.Session;
-import xyz.raymoore.javalin.Filter;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.Instant;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Connections {
     private final DataSource ds;
@@ -44,14 +42,23 @@ public class Connections {
         try (Connection conn = ds.getConnection()) {
             App.Homes.use().setConnection(conn);
 
-            String cookie = ctx.cookieStore().get(Filter.SESSION_COOKIE_KEY);
-            UUID sessionId = UUID.fromString(cookie);
-            Session session = App.Homes.use().getSessionHome().find(sessionId);
+            Homes homes = new Homes(conn);
 
-            Instant entryDate = session.getEntryDate();
-            long seconds = Instant.now().getEpochSecond() - entryDate.getEpochSecond();
+            Puzzle puzzle = homes.getPuzzleHome().findMostRecent();
+            List<Group> groups = homes.getGroupHome().findByPuzzle(puzzle);
 
-            ctx.html(String.format("Hello! You first visited this site %d seconds ago [sid: %s]", seconds, sessionId));
+            List<String> words = new ArrayList<>();
+            groups.forEach(group -> {
+                words.addAll(List.of(group.getWords()));
+            });
+
+            StringBuilder sb = new StringBuilder("The words are: ");
+            for (int i = 0; i < words.size(); i++) {
+                sb.append(i == 0 ? "" : ", ");
+                sb.append(words.get(i));
+            }
+
+            ctx.html(sb.toString());
         }
     }
 

@@ -4,6 +4,9 @@ import net.jextra.fauxjo.bean.FauxjoField;
 import net.jextra.fauxjo.bean.FauxjoPrimaryKey;
 import xyz.raymoore.app.connections.category.Color;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 public class Group {
@@ -72,6 +75,14 @@ public class Group {
 
         public Home() {
             super(String.format("%s.%s", SCHEMA, "Group"), Group.class);
+        }
+
+        public List<Group> findByPuzzle(Puzzle puzzle) throws SQLException {
+            String sql = buildBasicSelect("where puzzleId=uuid(?)");
+            PreparedStatement statement = prepareStatement(sql);
+            statement.setObject(1, puzzle.getId());
+
+            return getList(statement.executeQuery());
         }
     }
 }

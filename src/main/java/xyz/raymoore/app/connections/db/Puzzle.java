@@ -3,6 +3,7 @@ package xyz.raymoore.app.connections.db;
 import net.jextra.fauxjo.bean.Fauxjo;
 import net.jextra.fauxjo.bean.FauxjoField;
 import net.jextra.fauxjo.bean.FauxjoPrimaryKey;
+import xyz.raymoore.Page;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -48,6 +49,13 @@ public class Puzzle extends Fauxjo {
             statement.setObject(1, id);
 
             return getUnique(statement.executeQuery());
+        }
+
+        public Puzzle findMostRecent() throws SQLException {
+            String sql = buildBasicSelect("order by puzzleDate desc limit 1");
+            PreparedStatement statement = prepareStatement(sql);
+
+            return getFirst(statement.executeQuery());
         }
     }
 }
