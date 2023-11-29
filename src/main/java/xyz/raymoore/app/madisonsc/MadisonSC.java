@@ -131,6 +131,7 @@ public class MadisonSC implements Routes {
         public static List<UUID> rankContestants(List<Pick> picks, int week) {
             TreeMap<UUID, Integer> map = new TreeMap<>();
 
+            // Populate map with point values
             for (Pick pick : picks) {
                 if (pick.getResult() == null || pick.getWeek() > week) {
                     continue;  // "TBD" game
@@ -144,6 +145,7 @@ public class MadisonSC implements Routes {
                 }
             }
 
+            // Sort map by point values
             List<UUID> rankedList = new ArrayList<>();
             for (UUID contestantId : map.keySet()) {
                 int points = map.get(contestantId);
