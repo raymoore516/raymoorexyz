@@ -56,19 +56,27 @@ public class Contestant extends Fauxjo {
             super(SCHEMA + ".Contestant", Contestant.class);
         }
 
-        public Contestant findByName(String name) throws SQLException {
-            String clause = "where lower(name)=?";
+        public Contestant find(UUID contestantId) throws SQLException {
+            String clause = "WHERE contestantId=uuid(?)";
             PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
-            statement.setString(1, name.toLowerCase());
+            statement.setObject(1, contestantId);
 
             return getUnique(statement.executeQuery());
         }
 
         public List<Contestant> findAll() throws SQLException {
-            String clause = "order by entryDate";
+            String clause = "ORDER BY entryDate";
             PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
 
             return getList(statement.executeQuery());
+        }
+
+        public Contestant findByName(String name) throws SQLException {
+            String clause = "WHERE lower(name)=?";
+            PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
+            statement.setString(1, name.toLowerCase());
+
+            return getUnique(statement.executeQuery());
         }
     }
 }

@@ -22,7 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MadisonSC implements Routes {
     public static final String TUCK = "src/main/webapp/madisonsc/blocks.thtml";
@@ -108,6 +110,59 @@ public class MadisonSC implements Routes {
             this.homes = new Homes(conn);
         }
 
+        public static String calculateRecord(List<Pick> picks) {
+            int wins = 0, losses = 0, ties = 0;
+
+            for (Pick pick : picks) {
+                if (pick.getResult() == null) {
+                    continue;  // "TBD" game
+                }
+
+                switch (pick.getResult()) {
+                    case win -> wins++;
+                    case loss -> losses++;
+                    case tie -> ties++;
+                }
+            }
+
+            return String.format("%s-%s-%s", wins, losses, ties);
+        }
+
+        public static List<UUID> rankContestants(List<Pick> picks, int week) {
+            TreeMap<UUID, Integer> map = new TreeMap<>();
+
+            for (Pick pick : picks) {
+                if (pick.getResult() == null || pick.getWeek() > week) {
+                    continue;  // "TBD" game
+                }
+
+                UUID contestantId = pick.getContestantId();
+                int points = map.get(contestantId) == null ? 0 : map.get(contestantId);
+                switch (pick.getResult()) {
+                    case win -> map.put(contestantId, points + 3);
+                    case tie -> map.put(contestantId, points + 1);
+                }
+            }
+
+            List<UUID> rankedList = new ArrayList<>();
+            for (UUID contestantId : map.keySet()) {
+                int points = map.get(contestantId);
+                for (int i = 0; i < rankedList.size(); i++) {
+                    if (points > map.get(rankedList.get(i))) {
+                        rankedList.add(i, contestantId);
+                        break;
+                    }
+                }
+                if (!rankedList.contains(contestantId)) {
+                    rankedList.add(contestantId);
+                }
+            }
+
+            return rankedList;
+        }
+
+        // ---
+
         public void submitWeeklyPicks(int year, int week, Submission submission) throws SQLException {
             Contestant contestant = homes.getContestantHome().findByName(submission.getContestant());
             if (contestant == null) {
@@ -124,18 +179,18 @@ public class MadisonSC implements Routes {
         private static Pick parseWeeklyPick(int year, int week, String value) {
             // pc[0] = "CLE", "IND", "GB", etc.
             // pc[1] = "+3.5", "PK", "-7", etc.
-            // pc[2] = "W" or "L" or "T"
-            String[] pc = value.split("\\s+");
+            // pc[2] = "W" or "L" or "T" or null
+            String[] ary = value.split("\\s+");  // RegEx to split by all space(s)
 
             // Build database object
             Pick pick = new Pick();
             pick.setYear(year);
             pick.setWeek(week);
-            pick.setTeam(Team.find(pc[0]));
-            pick.setUnderdog(pc[1].startsWith("+"));  // Ties are false
-            pick.setLine(pc[1].toUpperCase().contains("PK") ? 0
-                    : Double.parseDouble(pc[1].substring(1)));  // Handle "PK" for pick em
-            pick.setResult(Result.findByCode(pc[2]));
+            pick.setTeam(Team.find(ary[0]));
+            pick.setUnderdog(ary[1].startsWith("+"));  // Ties are false (doesn't really matter)
+            pick.setLine(ary[1].toUpperCase().contains("PK") ? 0
+                    : Double.parseDouble(ary[1].substring(1)));  // Handle "PK" for pick em
+            pick.setResult(ary.length < 3 ? null : Result.findByCode(ary[2]));
 
             return pick;
         }
@@ -160,10 +215,12 @@ public class MadisonSC implements Routes {
             Block content = tucker.buildBlock("content");
             page.setContent(content);
 
-            List<Contestant> contestants = homes.getContestantHome().findAll();
-            for (Contestant c : contestants) {
-                Block contestant = buildWeeklyContestant(year, week, c);
-                content.insert("contestant", contestant);
+            List<Pick> picks = homes.getPickHome().findByYear(year);
+
+            for (UUID contestantId : Engine.rankContestants(picks, week)) {
+                Contestant contestant = homes.getContestantHome().find(contestantId);
+                Block card = buildWeeklyContestant(year, week, contestant, picks);
+                content.insert("contestant", card);
             }
 
             for (int num = 1; num < 19; num++) {
@@ -177,11 +234,18 @@ public class MadisonSC implements Routes {
             return page;
         }
 
-        private Block buildWeeklyContestant(int year, int week, Contestant c) throws SQLException {
+        private Block buildWeeklyContestant(int year, int week, Contestant c, List<Pick> picks) {
+            List<Pick> weekPicks = picks.stream()
+                    .filter(pick -> pick.getWeek() == week && pick.getContestantId().equals(c.getId()))
+                    .toList();
+
+            List<Pick> yearPicks = picks.stream()
+                    .filter(pick -> pick.getWeek() <= week && pick.getContestantId().equals(c.getId()))
+                    .toList();
+
             Block contestant = tucker.buildBlock("contestant");
             contestant.setVariable("name", c.getName());
 
-            List<Pick> weekPicks = homes.getPickHome().findByContestantYearWeek(c, year, week);
             if (weekPicks.size() == 0) {
                 Block message = tucker.buildBlock("message");
                 message.setVariable("message", "No picks found");
@@ -207,14 +271,11 @@ public class MadisonSC implements Routes {
 
             Block weekly = tucker.buildBlock("weekly-summary");
             weekly.setVariable("week", String.valueOf(week));
-            weekly.setVariable("record", Result.calculateRecord(weekPicks));
+            weekly.setVariable("record", Engine.calculateRecord(weekPicks));
             contestant.insert("summary", weekly);
 
-            List<Pick> yearPicks = homes.getPickHome().findByContestantYear(c, year)
-                    .stream().filter(p -> p.getWeek() <= week).toList();  // Filter "future" picks for "this" week
-
             Block yearly = tucker.buildBlock("yearly-summary");
-            yearly.setVariable("record", Result.calculateRecord(yearPicks));
+            yearly.setVariable("record", Engine.calculateRecord(yearPicks));
             contestant.insert("summary", yearly);
 
             return contestant;

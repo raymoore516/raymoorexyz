@@ -131,6 +131,14 @@ public class Pick {
             super(SCHEMA + ".Pick", Pick.class);
         }
 
+        public List<Pick> findByYear(int year) throws SQLException {
+            String clause = "WHERE year=? ORDER BY entryDate";
+            PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
+            statement.setInt(1, year);
+
+            return getList(statement.executeQuery());
+        }
+
         public List<Pick> findByContestantYear(Contestant c, int year) throws SQLException {
             String clause = "WHERE contestantId=uuid(?) AND year=? ORDER BY entryDate";
             PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
