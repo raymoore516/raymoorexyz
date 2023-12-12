@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MadisonSC implements Routes {
+    public static final int NUM_WEEKS = 18;
+
     public static final String TUCK = "src/main/webapp/madisonsc/blocks.thtml";
     public static final String CSS = "/madisonsc/style.css";
     public static final String JS = "/madisonsc/script.js";
@@ -210,11 +212,14 @@ public class MadisonSC implements Routes {
         }
 
         public Page buildWeekly(int year, int week) throws IOException, SQLException {
-            Page page = new Page(String.format("MSC Year %d, Week %d", year, week));
+            String title = String.format("MSC Year %d, Week %d", year, week);
+
+            Page page = new Page(title);
             page.addStylesheet(CSS);
             page.addScript(JS);
 
             Block content = tucker.buildBlock("content");
+            content.setVariable("title", title);
             page.setContent(content);
 
             List<Pick> picks = homes.getPickHome().findByYear(year);
@@ -225,7 +230,7 @@ public class MadisonSC implements Routes {
                 content.insert("contestant", card);
             }
 
-            for (int num = 1; num < 19; num++) {
+            for (int num = 1; num <= NUM_WEEKS; num++) {
                 String href = String.format("/madisonsc/picks/%d/%d", year, num);
                 Block pageButton = tucker.buildBlock("page-button");
                 pageButton.setVariable("href", href);
