@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MadisonSC implements Routes {
     public static final int NUM_WEEKS = 18;
@@ -38,7 +36,7 @@ public class MadisonSC implements Routes {
 
     // ---
 
-    public MadisonSC(Settings settings) throws IOException {
+    public MadisonSC(Settings settings) {
         this.ds = settings.getPostgres().useDataSource();
         this.secret = settings.getSecret();
     }
