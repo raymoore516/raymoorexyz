@@ -8,10 +8,25 @@ div#content
 
 == contestant
 div#$id.contestant
-    h2 | $name
-    > message
-    > table
-    > summary
+    div.contestant-header
+        h2 | $name
+        div.contestant-records
+            div.contestant-yearly-record
+                strong | Cumulative Record:
+                span | $cumulativeRecord
+            div.contestant-weekly-record
+                strong | Weekly Record:
+                span | $weeklyRecord
+    div.contestant-weekly-picks
+        > message
+        > pick
+
+== contestant-weekly-pick
+div.contestant-weekly-pick
+    div.spread | $spread
+    div.logo
+        img src="$logo" width="50px"
+    div.result | $result
 
 == message
 p.$class | $message
@@ -19,25 +34,6 @@ p.$class | $message
 == page-button
 div.page-button
     a href="$href" | $num
-
-== table
-table.weekly-picks
-    thead
-        tr
-            td | Logo
-            td | Team
-            td | Spread
-            td | Result
-    tbody
-        > row
-
-== table-row
-tr
-    td
-        img src="$src" width="45px" height="30px"
-    td | $team
-    td | $spread
-    td | $result
 
 == weekly-summary
 div.summary.weekly-summary

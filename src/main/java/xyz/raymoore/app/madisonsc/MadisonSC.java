@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class MadisonSC implements Routes {
+    public static final String MANNING_FACE = "https://i0.kym-cdn.com/photos/images/newsfeed/001/207/210/b22.jpg";
     public static final int NUM_WEEKS = 18;
 
     public static final String TUCK = "src/main/webapp/madisonsc/blocks.thtml";
@@ -215,7 +216,7 @@ public class MadisonSC implements Routes {
             Page page = new Page(title);
             page.addStylesheet(CSS);
             page.addScript(JS);
-            page.setMetaImage("https://i0.kym-cdn.com/photos/images/newsfeed/001/207/210/b22.jpg");  // ManningFace
+            page.setMetaImage(MANNING_FACE);  // ManningFace
 
             Block content = tucker.buildBlock("content");
             content.setVariable("title", title);
@@ -251,38 +252,28 @@ public class MadisonSC implements Routes {
 
             Block contestant = tucker.buildBlock("contestant");
             contestant.setVariable("name", c.getName());
+            contestant.setVariable("weeklyRecord", Engine.calculateRecord(weekPicks));
+            contestant.setVariable("cumulativeRecord", Engine.calculateRecord(yearPicks));
 
             if (weekPicks.size() == 0) {
                 Block message = tucker.buildBlock("message");
                 message.setVariable("message", "No picks found");
                 contestant.insert("message", message);
-            } else {
-                Block table = tucker.buildBlock("table");
-                contestant.insert("table", table);
-                for (Pick p : weekPicks) {
-                    Block row = tucker.buildBlock("table-row");
-                    table.insert("row", row);
-
-                    String team = p.getTeam().name();
-                    String src = String.format("/madisonsc/img/logo/%s.gif", team);
-                    String spread = p.getLine() == 0.0 ? "PK"
-                            : String.format("%s%s", p.isUnderdog() ? "+" : "-", p.getLine());
-
-                    row.setVariable("src", src);
-                    row.setVariable("team", team);
-                    row.setVariable("spread", spread);
-                    row.setVariable("result", p.getResult() == null ? "TBD" : p.getResult().name().toUpperCase());
-                }
+                return contestant;  // GUARD CLAUSE
             }
 
-            Block weekly = tucker.buildBlock("weekly-summary");
-            weekly.setVariable("week", String.valueOf(week));
-            weekly.setVariable("record", Engine.calculateRecord(weekPicks));
-            contestant.insert("summary", weekly);
+            for (Pick p : weekPicks) {
+                String team = p.getTeam().name();
+                String logo = String.format("/madisonsc/img/logo/%s.gif", team);
+                String spread = p.getLine() == 0.0 ? "PK"
+                        : String.format("%s%s", p.isUnderdog() ? "+" : "-", p.getLine());
 
-            Block yearly = tucker.buildBlock("yearly-summary");
-            yearly.setVariable("record", Engine.calculateRecord(yearPicks));
-            contestant.insert("summary", yearly);
+                Block pick = tucker.buildBlock("contestant-weekly-pick");
+                pick.setVariable("spread", String.format("%s %s", team, spread));
+                pick.setVariable("logo", logo);
+                pick.setVariable("result",  p.getResult() == null ? "TBD" : p.getResult().name().toUpperCase());
+                contestant.insert("pick", pick);
+            }
 
             return contestant;
         }
