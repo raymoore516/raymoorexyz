@@ -22,7 +22,7 @@ div#$id.contestant
         > pick
 
 == contestant-weekly-pick
-div.contestant-weekly-pick
+div.contestant-weekly-pick.$class
     div.spread | $spread
     div.logo
         img src="$logo" width="50px"

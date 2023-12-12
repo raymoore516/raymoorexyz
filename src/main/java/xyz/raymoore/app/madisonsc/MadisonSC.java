@@ -269,6 +269,7 @@ public class MadisonSC implements Routes {
                         : String.format("%s%s", p.isUnderdog() ? "+" : "-", p.getLine());
 
                 Block pick = tucker.buildBlock("contestant-weekly-pick");
+                pick.setVariable("class", p.getResult() == null ? null : p.getResult().name());
                 pick.setVariable("spread", String.format("%s %s", team, spread));
                 pick.setVariable("logo", logo);
                 pick.setVariable("result",  p.getResult() == null ? "TBD" : p.getResult().name().toUpperCase());

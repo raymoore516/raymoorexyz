@@ -54,7 +54,7 @@
     background: rgb(230, 240, 255);
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    padding: 1ch;
+    padding: 1ch 2ch;
 }
 
 #content .contestant-records {
@@ -62,14 +62,18 @@
 }
 
 #content .contestant-weekly-picks {
+    background: rgb(250, 250, 255);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
     display: flex;
     justify-content: center;
     gap: 2vw;
-    margin: 1ch 0ch;
+    padding: 2vh 0vw;
 }
 
 #content .contestant-weekly-pick {
-    border: 1px solid #CCC;
+    background: #EEE;
+    border: 1px solid #AAA;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -83,11 +87,22 @@
 }
 
 #content .contestant-weekly-pick .logo {
-    border: 1px solid #EEE;
+    border: 1px solid #444;
     background: white;
     padding: 5px;
 }
 
-#content .contestant-weekly-pick .win {
+#content .contestant-weekly-pick.win {
     background: #EFE;
+    border: 1px solid #565;
+}
+
+#content .contestant-weekly-pick.loss {
+    background: #FEE;
+    border: 1px solid #655;
+}
+
+#content .contestant-weekly-pick.tie {
+    background: #FFE;
+    border: 1px solid #665;
 }
