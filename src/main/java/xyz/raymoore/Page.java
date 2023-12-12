@@ -37,6 +37,10 @@ public class Page {
         root.insert("js", js);
     }
 
+    public void setMetaImage(String url) {
+        root.setVariable("metaImage", url);
+    }
+
     public void setTitle(String title) {
         root.setVariable("title", title);
     }

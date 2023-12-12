@@ -2,30 +2,52 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    font-family: 'Verdana';
+    margin-top: 5vh;
 }
 
-.current-week {
+#content * {
+    margin: 0;
+}
+
+#content .current-week {
     display: flex;
     gap: 10px;
     padding-bottom: 20px;
-    border-bottom: 1px solid gray;
 }
 
-.contestant {
+#content .contestant {
     border: 1px solid gray;
     padding: 10px;
 }
 
-.contestant h2 {
+#content .contestant h2 {
     margin: 10px 0px;
 }
 
-.contestant .summary {
+#content .contestant .summary {
     margin-top: 1ch;
 }
 
-.pagination {
-    display: flex;
+#content .pagination {
+    display: grid;
     gap: 10px;
-    padding-top: 10px;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    text-align: center;
+    margin: 20px 0px;
+}
+
+#content .page-button {
+    display: flex;
+}
+
+#content .page-button a {
+    padding: 1vh 2vw;
+    background: rgb(230, 240, 255);
+    border: 1px solid rgb(0, 10, 50);
+    color: rgb(0, 10, 50);
+    border-radius: 10px;
+    text-decoration: none;
+    width: 100%
 }

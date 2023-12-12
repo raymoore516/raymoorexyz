@@ -1,10 +1,10 @@
 == content
 div#content
     h1 | $title
-    div.current-week
-        > contestant
     div.pagination
         > page-button
+    div.current-week
+        > contestant
 
 == contestant
 div#$id.contestant

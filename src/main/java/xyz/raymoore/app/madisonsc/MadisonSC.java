@@ -217,6 +217,7 @@ public class MadisonSC implements Routes {
             Page page = new Page(title);
             page.addStylesheet(CSS);
             page.addScript(JS);
+            page.setMetaImage("https://i0.kym-cdn.com/photos/images/newsfeed/001/207/210/b22.jpg");  // ManningFace
 
             Block content = tucker.buildBlock("content");
             content.setVariable("title", title);
