@@ -10,13 +10,9 @@ div#content
 div#$id.contestant
     div.contestant-header
         h2 | $name
-        div.contestant-records
-            div.contestant-yearly-record
-                strong | Cumulative Record:
-                span | $cumulativeRecord
-            div.contestant-weekly-record
-                strong | Weekly Record:
-                span | $weeklyRecord
+        div.contestant-weekly-record
+            strong | Weekly Record:
+            span | $weeklyRecord
     div.contestant-weekly-picks
         > message
         > pick

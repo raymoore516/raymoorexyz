@@ -251,9 +251,9 @@ public class MadisonSC implements Routes {
                     .toList();
 
             Block contestant = tucker.buildBlock("contestant");
-            contestant.setVariable("name", c.getName());
+            String name = String.format("%s (%s)", c.getName(), Engine.calculateRecord(yearPicks));
+            contestant.setVariable("name", name);
             contestant.setVariable("weeklyRecord", Engine.calculateRecord(weekPicks));
-            contestant.setVariable("cumulativeRecord", Engine.calculateRecord(yearPicks));
 
             if (weekPicks.size() == 0) {
                 Block message = tucker.buildBlock("message");
