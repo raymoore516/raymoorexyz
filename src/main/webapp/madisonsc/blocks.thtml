@@ -21,7 +21,7 @@ div#$id.contestant
 div.contestant-weekly-pick.$class
     div.spread | $spread
     div.logo
-        img src="$logo" width="50px"
+        img src="$logo"
     div.result | $result
 
 == message
