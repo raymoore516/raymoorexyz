@@ -134,12 +134,14 @@ public class MadisonSC implements Routes {
 
             // Populate map with point values
             for (Pick pick : picks) {
+                UUID contestantId = pick.getContestantId();
+                map.putIfAbsent(contestantId, 0);  // Initialize with zero points
+
                 if (pick.getResult() == null || pick.getWeek() > week) {
                     continue;  // "TBD" game
                 }
 
-                UUID contestantId = pick.getContestantId();
-                int points = map.get(contestantId) == null ? 0 : map.get(contestantId);
+                int points = map.get(contestantId);
                 switch (pick.getResult()) {
                     case win -> map.put(contestantId, points + 3);
                     case tie -> map.put(contestantId, points + 1);
