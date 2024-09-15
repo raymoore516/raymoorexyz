@@ -157,5 +157,12 @@ public class Pick {
 
             return getList(statement.executeQuery());
         }
+
+        public Pick findMostRecent() throws SQLException {
+            String clause = "ORDER BY year DESC, week DESC, entryDate DESC LIMIT 1";
+            PreparedStatement statement = prepareStatement(buildBasicSelect(clause));
+
+            return getUnique(statement.executeQuery());
+        }
     }
 }
