@@ -3,6 +3,8 @@ div#content
     h1 | $title
     div.pagination
         > page-button
+    div.banner
+        > message
     div.current-week
         > contestant
 
@@ -26,6 +28,9 @@ div.contestant-weekly-pick.$class
 
 == message
 p.$class | $message
+
+== reyna
+p.alert | Year 12 has been suspended in loving memory of Reyna
 
 == page-button
 div.page-button

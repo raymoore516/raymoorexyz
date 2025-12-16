@@ -224,6 +224,11 @@ public class MadisonSC implements Routes {
             content.setVariable("title", title);
             page.setContent(content);
 
+            if (year == 12) {
+                Block reyna = tucker.buildBlock("reyna");
+                content.insert("message", reyna);
+            }
+
             List<Pick> picks = homes.getPickHome().findByYear(year);
 
             for (UUID contestantId : Engine.rankContestants(picks, week)) {

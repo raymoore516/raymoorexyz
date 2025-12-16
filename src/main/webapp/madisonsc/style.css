@@ -23,6 +23,13 @@
     font-size: 1.3em;
 }
 
+#content .alert {
+    background-color: #FFF3E0;
+    border: 1px solid #FB8C00;
+    padding: 2ch;
+    margin-bottom: 1ch;
+}
+
 #content .pagination {
     display: grid;
     gap: 10px;
