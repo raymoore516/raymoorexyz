@@ -67,8 +67,10 @@ ENTRYPOINT ["java", "-jar", "/webapp.jar"]
 The following command will **build** the Docker image using the `dockerfile` above.
 
 ```
-docker build -t raymoorexyz .
+docker buildx build --platform linux/amd64 -t raymoorexyz . 
 ```
+
+The `--platform` of `linux/amd64` is necessary if deploying on Render.
 
 ## Step 3: Docker Repository
 
