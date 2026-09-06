@@ -182,6 +182,8 @@ Generate UUIDv4 IDs with PostgreSQL's built-in `pg_catalog.gen_random_uuid()` in
 
 This root plan will also describe schema requirements for shared personal-site features, such as authentication, when those features need persistent data. No shared identity tables or auth schema are defined yet.
 
+<a id="authentication-and-authorization"></a>
+
 ## Authentication and authorization
 
 ### Proof of concept: API secret
@@ -213,6 +215,8 @@ Configure Spring Security's login page/entry point, authorization endpoint base 
 Set the client registration's redirect URI to `{baseUrl}/auth/login/oauth2/code/{registrationId}` and register the matching full callback URLs for local development and production in Google Cloud. Google's [redirect URI requirements](https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred) require an exact match. Use the browser-facing origin, including Vite's port locally. Route `/auth` to Spring Boot in both environments and exclude it from the React SPA fallback.
 
 At that phase, choose the browser authentication design together: server session or application JWT, credential storage/transport, expiration, CSRF handling, and logout. The original JWT idea is deferred, not something to retrofit onto the secret header. Google login does not require inventing a JWT issuer. Never put the administrator's shared secret in browser administration pages. Decide whether to retain the separate secret-authenticated API for administrative tools when the browser flow is introduced.
+
+<a id="database-change-workflow"></a>
 
 ## Database change workflow
 

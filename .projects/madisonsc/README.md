@@ -15,6 +15,8 @@ The [root PROJECT.md](../../PROJECT.md) owns shared technologies, application ar
 - **Later:** a Picks Submission page protected by Spring Security and Google OAuth 2.0 / OpenID Connect. JWT/session design is deferred and must not block the proof of concept.
 - Do not add contestant self-service, multi-administrator coordination, submission deadlines, automatic grading, or edit workflows to the initial scope.
 
+<a id="madison-sc-domain-and-database"></a>
+
 ## Madison SC domain and database
 
 ### Core model
