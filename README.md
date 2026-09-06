@@ -13,7 +13,7 @@ The project is in the planning stage. Application scaffolding and local setup ar
 A monorepo with two top-level application directories:
 
 - **`frontend/`** — React and TypeScript, using Vite for development and builds.
-- **`backend/`** — Java and Spring Boot with Spring Data JDBC, built with Maven. The planned main class is `xyz.raymoore.App` in `backend/src/main/java/xyz/raymoore/App.java`.
+- **`backend/`** — Java and Spring Boot with Spring Data JDBC, built with Maven.
 
 PostgreSQL stores application data, Flyway manages SQL schema changes, and Docker supports local infrastructure and deployment.
 
