@@ -14,7 +14,8 @@ Keep this context in mind when interacting with the developer.
 
 ## Project Overview
 
-Refer to [PROJECT.md](PROJECT.md) for the project plan and technical architecture.
+Refer to [PROJECT.md](PROJECT.md) for shared personal-site technologies, authentication strategy, and technical architecture.
+Refer to project plans under `.agents/projects/` for project-specific requirements and data models, starting with [Madison SC](.agents/projects/madisonsc/PROJECT.md).
 Refer to [README.md](README.md) for the project overview and developer setup.
 
 Keep these documents updated as code is commited and decisions are revised.
