@@ -113,7 +113,7 @@ If an error names user `"${DB_USER}"` literally, Java did not receive a usable `
 
 ### Schema changes
 
-Add future schema changes as `V2__description.sql`, `V3__description.sql`, etc. Applied migrations must remain unchanged. The archived application's `0003.sql` uses unquoted camelCase columns, which Postgres stores as `contestantid`, `pickid`, and `entrydate`; this implementation follows the new plan's snake_case columns. Production adoption requires confirming/converting those names first. Automatic baselining is disabled. See the [first-attachment plan](PROJECT.md#first-attachment-to-existing-production-database) before connecting Flyway to an existing database.
+Add future schema changes as `V2__description.sql`, `V3__description.sql`, etc. Applied migrations must remain unchanged. The archived application's `0003.sql` uses unquoted camelCase columns, which Postgres stores as `contestantid`, `pickid`, and `entrydate`; this implementation follows the new plan's snake_case columns. Production adoption requires confirming/converting those names first. Automatic baselining is disabled. See the [first-attachment section in PROJECT.md](PROJECT.md) before connecting Flyway to an existing database.
 
 During initial development, V1 was explicitly revised to use native UUID generation without adding V2. A local database that already applied the earlier V1 will fail Flyway checksum validation. Use a fresh local database, or deliberately reconcile both existing primary-key defaults and Flyway history before restarting. A checksum repair alone does not change the old defaults. This code change does not modify existing databases or remove installed extensions.
 

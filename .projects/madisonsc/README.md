@@ -15,8 +15,6 @@ The [root PROJECT.md](../../PROJECT.md) owns shared technologies, application ar
 - **Later:** a Picks Submission page protected by Spring Security and Google OAuth 2.0 / OpenID Connect. JWT/session design is deferred and must not block the proof of concept.
 - Do not add contestant self-service, multi-administrator coordination, submission deadlines, automatic grading, or edit workflows to the initial scope.
 
-<a id="madison-sc-domain-and-database"></a>
-
 ## Madison SC domain and database
 
 ### Core model
@@ -138,7 +136,7 @@ The proposed weekly response includes `year`, `week`, season label, and ordered 
 
 ## Authentication and authorization
 
-Follow the [site authentication strategy](../../PROJECT.md#authentication-and-authorization). Public Madison SC pages and JSON reads require no login. Ray is the sole administrator.
+Follow the [site authentication strategy in PROJECT.md](../../PROJECT.md). Public Madison SC pages and JSON reads require no login. Ray is the sole administrator.
 
 For the proof of concept, protect `POST /madisonsc/picks/{year}/{week}` with the `api-secret` header backed by `APP_API_SECRET`. Scope the authentication filter and any header-only CSRF exemption to this exact POST route, including the fact that it is outside `/api`. Missing or invalid credentials return `401`; an absent or blank configured secret must prevent writes. The React application never receives the secret. Local API-client submissions go directly to `http://localhost:8080/madisonsc/picks/{year}/{week}`.
 
@@ -146,7 +144,7 @@ A Picks Submission page belongs to the later Google-login phase. It must authori
 
 ## Persistence and migration details
 
-The `madisonsc` schema belongs to this project within the shared `raymoorexyz` database. Follow the [root database change workflow](../../PROJECT.md#database-change-workflow), including idempotent initial SQL, immutable versioned migrations, and baseline-at-zero adoption of the existing production schema.
+The `madisonsc` schema belongs to this project within the shared `raymoorexyz` database. Follow the [root database change workflow in PROJECT.md](../../PROJECT.md), including idempotent initial SQL, immutable versioned migrations, and baseline-at-zero adoption of the existing production schema.
 
 - Keep migration files in `backend/src/main/resources/db/migration/`, starting with `V1__create_madisonsc.sql`; a subsequent agreed change could use `V2__add_pick_validation_constraints.sql`. Versions belong to the shared application migration sequence.
 - Initially configure Flyway's managed schemas as `public,madisonsc`, with its history table in `public`, so existing Madison SC objects participate in the empty/nonempty schema check.

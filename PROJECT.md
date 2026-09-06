@@ -174,15 +174,13 @@ Pay particular attention to IDs and defaults. A non-null, application-assigned U
 
 ## Database schema organization
 
-Use one `raymoorexyz` PostgreSQL database per environment. Each project gets its own schema within that database; for example, Madison SC owns `madisonsc`. Project tables, constraints, and domain mappings are documented in that project's plan, starting with the [Madison SC database model](.projects/madisonsc/README.md#madison-sc-domain-and-database).
+Use one `raymoorexyz` PostgreSQL database per environment. Each project gets its own schema within that database; for example, Madison SC owns `madisonsc`. Project tables, constraints, and domain mappings are documented in that project's plan, starting with the [Madison SC database model in the Madison SC README](.projects/madisonsc/README.md).
 
 Use lowercase `snake_case` database identifiers and schema-qualified application SQL. Keep Flyway's shared history table in `public` and include each project schema in its managed schemas as projects are added.
 
 Generate UUIDv4 IDs with PostgreSQL's built-in `pg_catalog.gen_random_uuid()` in column defaults. No UUID extension is required. See [PostgreSQL 15 UUID functions](https://www.postgresql.org/docs/15/functions-uuid.html).
 
 This root plan will also describe schema requirements for shared personal-site features, such as authentication, when those features need persistent data. No shared identity tables or auth schema are defined yet.
-
-<a id="authentication-and-authorization"></a>
 
 ## Authentication and authorization
 
@@ -215,8 +213,6 @@ Configure Spring Security's login page/entry point, authorization endpoint base 
 Set the client registration's redirect URI to `{baseUrl}/auth/login/oauth2/code/{registrationId}` and register the matching full callback URLs for local development and production in Google Cloud. Google's [redirect URI requirements](https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred) require an exact match. Use the browser-facing origin, including Vite's port locally. Route `/auth` to Spring Boot in both environments and exclude it from the React SPA fallback.
 
 At that phase, choose the browser authentication design together: server session or application JWT, credential storage/transport, expiration, CSRF handling, and logout. The original JWT idea is deferred, not something to retrofit onto the secret header. Google login does not require inventing a JWT issuer. Never put the administrator's shared secret in browser administration pages. Decide whether to retain the separate secret-authenticated API for administrative tools when the browser flow is introduced.
-
-<a id="database-change-workflow"></a>
 
 ## Database change workflow
 
