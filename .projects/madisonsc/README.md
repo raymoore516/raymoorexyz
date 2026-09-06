@@ -4,9 +4,9 @@
 
 Build an NFL pick'em league tracker for weekly picks against the spread, results, and cumulative standings as a project within the raymoore.xyz personal website. It will replace the existing Madison SC website.
 
-This is a greenfield implementation plan for AI coding agents, not completed functionality. Proposed API contracts and unresolved business rules are labeled explicitly.
+This is the implementation plan for AI coding agents. The database foundation is implemented with Flyway V1 and a startup JDBC contestant lookup; API and frontend features remain planned. Proposed API contracts and unresolved business rules are labeled explicitly.
 
-The [root PROJECT.md](../../../PROJECT.md) owns shared technologies, application architecture, authentication strategy, database migration conventions, and site navigation. This file owns Madison SC business requirements, its database schema, routes, UI behavior, and acceptance criteria. Read [AGENTS.md](../../../AGENTS.md) for collaboration guidance and [README.md](../../../README.md) for developer setup and day-to-day workflows. Keep these documents consistent as decisions are made.
+The [root PROJECT.md](../../PROJECT.md) owns shared technologies, application architecture, authentication strategy, database migration conventions, and site navigation. This file owns Madison SC business requirements, its database schema, routes, UI behavior, and acceptance criteria. Read [AGENTS.md](../../AGENTS.md) for collaboration guidance and [README.md](../../README.md) for developer setup and day-to-day workflows. Keep these documents consistent as decisions are made.
 
 ## Initial scope and later work
 
@@ -36,12 +36,12 @@ Use lowercase `snake_case` for database identifiers, such as `pick_id`, `contest
 | | `line` | `numeric(3,1) NOT NULL` | Spread magnitude. |
 | | `result` | Nullable text | `win`, `loss`, `tie`; null means pending. |
 
-The UUID default in the reference schema uses `uuid_generate_v4()` from `uuid-ossp`. Initial SQL must establish that extension if retaining the expression; a different UUID-generation choice must be explicit.
+V1 uses PostgreSQL's built-in `pg_catalog.gen_random_uuid()` for UUIDv4 primary-key defaults; no extension is required. The old scripts used unquoted camelCase columns; V1 creates snake_case columns without converting existing legacy tables. Confirm the live schema before production adoption. Existing tables also need their UUID defaults checked: `CREATE TABLE IF NOT EXISTS` does not update them.
 
 Database invariants and mapping rules:
 
 - A contestant has many picks across years and weeks. Keep the unique key `(contestant_id, year, week, team)`.
-- Baseline secondary indexes cover contestant name and pick contestant/year/week/team/result. Review indexes against actual queries; the name uniqueness constraint already creates an index, and redundant indexes are unnecessary.
+- V1 uses the archived migration as reference, with snake_case columns as confirmed during implementation. It retains the original pick index names (`pick_contestantid`, `pick_year`, `pick_week`, `pick_team`, `pick_result`, and unique `pick_unique`). The name uniqueness constraint already creates an index, so V1 omits the redundant `contestant_name` index on fresh databases and preserves it where it already exists. Review indexes against actual queries as those are added.
 - Map UUIDs to Java `UUID`, timestamps to `Instant`, and `numeric(3,1)` to `BigDecimal`. Validate nonnegative magnitude, at most one decimal place, and a maximum of `99.9`.
 - Store `GB +3.5` as `team = GB`, `underdog = true`, `line = 3.5`; a negative spread uses `underdog = false`. Display zero as `PK`.
 - Use explicit team and result values. If Java enums use uppercase names, supply converters for lowercase stored results. Validate unknown values instead of interpreting them as pending.
@@ -136,7 +136,7 @@ The proposed weekly response includes `year`, `week`, season label, and ordered 
 
 ## Authentication and authorization
 
-Follow the [site authentication strategy](../../../PROJECT.md#authentication-and-authorization). Public Madison SC pages and JSON reads require no login. Ray is the sole administrator.
+Follow the [site authentication strategy](../../PROJECT.md#authentication-and-authorization). Public Madison SC pages and JSON reads require no login. Ray is the sole administrator.
 
 For the proof of concept, protect `POST /madisonsc/picks/{year}/{week}` with the `api-secret` header backed by `APP_API_SECRET`. Scope the authentication filter and any header-only CSRF exemption to this exact POST route, including the fact that it is outside `/api`. Missing or invalid credentials return `401`; an absent or blank configured secret must prevent writes. The React application never receives the secret. Local API-client submissions go directly to `http://localhost:8080/madisonsc/picks/{year}/{week}`.
 
@@ -144,7 +144,7 @@ A Picks Submission page belongs to the later Google-login phase. It must authori
 
 ## Persistence and migration details
 
-The `madisonsc` schema belongs to this project within the shared `raymoorexyz` database. Follow the [root database change workflow](../../../PROJECT.md#database-change-workflow), including idempotent initial SQL, immutable versioned migrations, and baseline-at-zero adoption of the existing production schema.
+The `madisonsc` schema belongs to this project within the shared `raymoorexyz` database. Follow the [root database change workflow](../../PROJECT.md#database-change-workflow), including idempotent initial SQL, immutable versioned migrations, and baseline-at-zero adoption of the existing production schema.
 
 - Keep migration files in `backend/src/main/resources/db/migration/`, starting with `V1__create_madisonsc.sql`; a subsequent agreed change could use `V2__add_pick_validation_constraints.sql`. Versions belong to the shared application migration sequence.
 - Initially configure Flyway's managed schemas as `public,madisonsc`, with its history table in `public`, so existing Madison SC objects participate in the empty/nonempty schema check.
