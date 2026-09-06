@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: raymoore-xyz
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  flyway:
+    default-schema: public
+    schemas: public,madisonsc
+    baseline-on-migrate: false
+    baseline-version: "0"
+  sql:
+    init:
+      mode: never
