@@ -1,0 +1,16 @@
+:root {
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+  color: #202124;
+  background-color: #fff;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 60rem;
+  margin-inline: auto;
+  padding: 2rem 1.5rem;
+}

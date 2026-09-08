@@ -24,3 +24,8 @@ buildNumber.properties
 
 # Local temporary files
 /.temp/
+
+# Frontend dependencies and build output
+node_modules/
+/frontend/dist/
+*.tsbuildinfo
