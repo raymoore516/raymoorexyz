@@ -10,15 +10,13 @@ import xyz.raymoore.madisonsc.repository.ContestantRepository;
 public class App {
 
     static void main(String[] args) {
-        try (var context = SpringApplication.run(App.class, args)) {
-            // This initial database smoke check exits after the startup runner finishes.
-        }
+        SpringApplication.run(App.class, args);
     }
 
     @Bean
     CommandLineRunner listContestants(ContestantRepository repository) {
         return args -> {
-            var contestants = repository.findAll();
+            var contestants = repository.findAllAlphabetically();
             System.out.println("Found " + contestants.size() + " contestant(s).");
             contestants.forEach(System.out::println);
         };

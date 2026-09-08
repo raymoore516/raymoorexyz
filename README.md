@@ -6,7 +6,7 @@ The project is also a learning exercise in Spring Boot, React, TypeScript, and A
 
 ## Status
 
-The database foundation is implemented: local PostgreSQL through Docker Compose, Flyway migrations, Spring Data JDBC domain records and repositories for contestants and picks, and a Spring Boot command-line application that lists contestants through a repository and exits. A minimal React/TypeScript home page now runs through Vite. HTTP endpoints, navigation, and Madison SC pages are still planned.
+The database foundation is implemented: local PostgreSQL through Docker Compose, Flyway migrations, Spring Data JDBC domain records and repositories for contestants and picks, and a Spring Boot application that lists contestants and serves a contestant endpoint. The React/TypeScript frontend now has Home and Madison SC pages with shared navigation. More HTTP endpoints and Madison SC views are still planned.
 
 ## Developer prerequisites (macOS / Homebrew)
 
@@ -82,13 +82,14 @@ Open **http://localhost:5173/** in your browser. The page displays **Hello World
 | --- | --- |
 | `index.html` | Browser HTML document containing the `root` element where React renders. |
 | `src/main.tsx` | Starts React, mounts `App` into that element, and imports the CSS. |
-| `src/App.tsx` | Top-level component; currently renders `HomePage`. |
-| `src/pages/HomePage.tsx` | A JavaScript-style function returning the page's heading and paragraph. Edit the text here. |
-| `src/styles.css` | Ordinary CSS for fonts, spacing, and layout. |
+| `src/App.tsx` | Top-level component; selects the current page and renders shared navigation. |
+| `src/app/pages/HomePage.tsx` | Global home page returning the heading and paragraph. Edit the text here. |
+| `src/projects/madisonsc/pages/MadisonScPage.tsx` | Madison SC landing page that loads contestants from the API. |
+| `src/app/styles.css` | Ordinary shared CSS for fonts, spacing, navigation, and layout. |
 | `tsconfig.json` | Enables strict TypeScript checking. |
 | `vite.config.ts` | Configures React support and the local server ports. |
 
-A **React component** is a function describing a piece of the UI. **JSX** is the HTML-like syntax returned by that function; React turns it into browser elements. A `.tsx` file is TypeScript that can contain JSX. **TypeScript** adds type checking to JavaScript during development; the browser receives JavaScript after the build. This page has no state, API calls, router, or navigation yet. It does not need a Spring controller. See [React's TypeScript introduction](https://react.dev/learn/typescript).
+A **React component** is a function describing a piece of the UI. **JSX** is the HTML-like syntax returned by that function; React turns it into browser elements. A `.tsx` file is TypeScript that can contain JSX. **TypeScript** adds type checking to JavaScript during development; the browser receives JavaScript after the build. React Router now handles navigation between `/` and `/madisonsc`, while the global home page itself still has no state or API calls and does not need a Spring controller. See [React's TypeScript introduction](https://react.dev/learn/typescript).
 
 ### Frontend verification and production build
 
@@ -102,7 +103,7 @@ npm run preview
 
 `typecheck` checks types without writing compiled files. `build` also runs that check, then produces deployable HTML, JavaScript, and CSS in `frontend/dist/`. Vite alone transpiles TypeScript without type-checking, so the separate check is intentional. `preview` serves the last build at **http://localhost:4173/**; rebuild after edits when using preview, and stop it with **Ctrl+C**. Preview is a local build check, not the production server. No frontend automated tests or lint command are configured in this initial scaffold.
 
-npm manages only `frontend/`; Maven continues to manage the Java backend. npm is used in local development and in CI/deployment builds to install dependencies and build the static frontend. The eventual production setup will package these files into Spring Boot, so the running Java application will not need Node or npm. That integration and backend HTTP serving are not implemented yet; the current Java runner still queries contestants and exits. The home page itself will continue to need no database calls.
+npm manages only `frontend/`; Maven continues to manage the Java backend. npm is used in local development and in CI/deployment builds to install dependencies and build the static frontend. The eventual production setup will package these files into Spring Boot, so the running Java application will not need Node or npm. The current backend serves `GET /api/madisonsc/contestants`, and Vite proxies that path from port 5173 to Spring Boot on port 8080 during development. The home page itself continues to need no database calls.
 
 ## Local developer setup: PostgreSQL on localhost:5432
 
@@ -147,7 +148,7 @@ PostgreSQL runs in a Docker container. You do not need a separate Postgres serve
 
    On startup, Flyway applies `backend/src/main/resources/db/migration/V1__create_madisonsc.sql`. It establishes `madisonsc.contestant`, `madisonsc.pick`, and the pick indexes. UUIDv4 IDs use PostgreSQL's built-in `pg_catalog.gen_random_uuid()`; no extension is required. Migration history lives in `public.flyway_schema_history`.
 
-   `App.java` then calls `ContestantRepository.findAll()` to fetch every row and column from `madisonsc.contestant`, prints each mapped `Contestant` record using `System.out.println`, and exits successfully. A fresh database prints `Found 0 contestant(s).`; migrations intentionally contain no sample contestants. The table is singular and schema-qualified, as specified in the project plan.
+   `App.java` then calls `ContestantRepository.findAllAlphabetically()` to fetch every row and column from `madisonsc.contestant`, prints each mapped `Contestant` record using `System.out.println`, and starts the web server on port 8080. A fresh database prints `Found 0 contestant(s).`; migrations intentionally contain no sample contestants. The table is singular and schema-qualified, as specified in the project plan.
 
 4. Open a SQL session to inspect the database or add a contestant:
 
@@ -209,7 +210,7 @@ docker compose up -d --wait postgres
 docker compose ps
 ```
 
-This reuses the existing database volume and `.env` file. PostgreSQL stays running when the Java application exits.
+This reuses the existing database volume and `.env` file. PostgreSQL stays running when the Java application stops.
 
 Stop the local database with `docker compose stop postgres`, or remove the container with `docker compose down`. The named volume preserves data in both cases. Avoid `docker compose down -v` unless you intend to delete the local database. Postgres applies the database/user/password initialization variables only when the volume is empty; editing `.env` does not change an existing database password. To change it, use `\password "local-dev-user"` in psql (substitute your configured user; double quotes preserve the hyphens), update `.env`, and reload the exported variables.
 

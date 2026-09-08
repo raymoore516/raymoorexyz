@@ -9,6 +9,13 @@ body {
   margin: 0;
 }
 
+nav {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
 main {
   max-width: 60rem;
   margin-inline: auto;
