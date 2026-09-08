@@ -14,10 +14,12 @@ public record Contestant(
         String name
 ) {
 
+    @SuppressWarnings("unused")
     public static Builder builder() {
         return new Builder();
     }
 
+    @SuppressWarnings("unused")
     public static final class Builder {
         private UUID contestantId;
         private Instant entryDate;
