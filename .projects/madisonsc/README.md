@@ -4,7 +4,7 @@
 
 Build an NFL pick'em league tracker for weekly picks against the spread, results, and cumulative standings as a project within the raymoore.xyz personal website. It will replace the existing Madison SC website.
 
-This is the implementation plan for AI coding agents. The database foundation is implemented with Flyway V1, mapped `Contestant` and `Pick` Java records in `xyz.raymoore.madisonsc.domain`, repositories, and a Spring MVC contestant endpoint. The React frontend has a Madison SC landing page at `/madisonsc` that reads `/api/madisonsc/contestants`; the richer weekly API and views remain planned. Proposed API contracts and unresolved business rules are labeled explicitly.
+This is the implementation plan for AI coding agents. The database foundation is implemented with Flyway V1, mapped `Contestant` and `Pick` Java records in `xyz.raymoore.madisonsc.domain`, repositories, and Spring MVC contestant/latest-week/weekly-picks endpoints. The React frontend resolves `/madisonsc` through the latest-week API, navigates to the populated weekly route, and renders responsive standings cards or an explicit empty state. Administrator submission remains planned. Proposed API contracts and unresolved business rules are labeled explicitly.
 
 The [root PROJECT.md](../../PROJECT.md) owns shared technologies, application architecture, authentication strategy, database migration conventions, and site navigation. This file owns Madison SC business requirements, its database schema, routes, UI behavior, and acceptance criteria. Read [AGENTS.md](../../AGENTS.md) for collaboration guidance and [README.md](../../README.md) for developer setup and day-to-day workflows. Keep these documents consistent as decisions are made.
 
@@ -55,7 +55,7 @@ There are no required matchup, schedule, or team tables in the initial model. Ea
 
 `year` is the year of the competition, not a calendar year. Year 13 is the **2026–2027 NFL season**, and Year 11 is the **2024–2025 NFL season**. Use these labels consistently in navigation and page headings; keep the competition number in URLs and database rows. With continuous annual numbering, the display mapping is season start year = competition year + 2013. Do not use that mapping to infer the active week or reject historical submissions.
 
-The live [Year 11, Week 18 page](https://raymoore.xyz/madisonsc/picks/11/18) is a content reference: it displays week links 1–18, five picks per contestant, team logos, spreads, results, and weekly/cumulative records. Retain that information in the React design; the new shared navigation and numeric ranks are additional UI requirements.
+The live [Year 11, Week 18 page](https://raymoore.xyz/madisonsc/picks/11/18) is a content reference: it displays week links 1–18, five picks per contestant, team logos, spreads, results, and weekly/cumulative records. Retain that information in the React design; the new shared navigation and medal indicators for the top three ranks are additional UI requirements.
 
 ### Weekly views and ranking
 
@@ -69,9 +69,9 @@ Confirmed rules:
 - A contestant with any picks in the selected competition year appears in its standings. Such a contestant can have an empty selected week, displayed as “No picks found.” A globally existing contestant with no picks that year need not appear; no season-roster table is needed for the initial application.
 - Identical W-L-T records share the same rank. Alphabetical contestant name is a display ordering, not a competitive tiebreaker. Use UUID only as a final stable display key.
 
-Define the exact win-percentage calculation when implementing the source code, including tie treatment, pending results, a zero-game record, and precision. This plan deliberately does not prescribe a formula or point system. One confirmed ordering example is that a cumulative `1-1-3` record ranks above `2-3-0`. Preserve that example as an acceptance case when selecting the calculation.
+Calculate cumulative win percentage as `(wins + 0.5 × ties) / completed games`, where completed games are wins, losses, and ties; pending results are excluded. Return the value as a decimal rounded to four places using half-up rounding, and return `0.0000` when there are no completed games. Rank using the exact unrounded ratio so rounding cannot create or remove a tie. This makes a cumulative `1-1-3` record (`0.5000`) rank above `2-3-0` (`0.4000`).
 
-Recommended rank display is competition ranking (`1, 2, 2, 4`), with tied contestants sharing a number and the following number skipping the tied positions. Keep rank calculation separate from alphabetical display ordering; do not introduce a competitive name-based tiebreaker.
+Calculate competition ranks as `1, 2, 2, 4`, with tied contestants sharing a rank and the following rank skipping the tied positions. In the UI, prepend gold, silver, and bronze medal emoji to contestants ranked first, second, and third respectively; display no rank marker for fourth place or lower. Keep rank calculation separate from alphabetical display ordering; do not introduce a competitive name-based tiebreaker.
 
 ### Administrator workflow
 
@@ -84,7 +84,7 @@ Keep contestant data and operational pick/result changes separate from Flyway sc
 
 ## HTTP API and browser routes
 
-Retain the existing administrator submission path, header, and shorthand body for the proof of concept. Add public JSON read APIs for React. The contestant endpoint is implemented; the remaining table entries describe the target Spring application and are not yet implemented in this repository.
+Retain the existing administrator submission path, header, and shorthand body for the proof of concept. The public contestant, latest-week, and weekly-picks JSON APIs are implemented; administrator submission remains planned.
 
 | Method | Path | Purpose / intended access |
 | --- | --- | --- |
@@ -108,7 +108,7 @@ ORDER BY year DESC, week DESC
 LIMIT 1;
 ```
 
-Return JSON containing the selected `year` and `week`, or an explicit empty result when no picks exist. The maximum competition year/week determines the selected week, not the newest insertion timestamp, current calendar date, or whether results are complete. Backfilling an older week must not move the selected week backward. The React `/madisonsc` page uses this response to request `/api/madisonsc/picks/{year}/{week}` and render the weekly view; an empty result renders a clear “No picks available” state with the shared navigation. A dashboard or season-selection landing page may be added later.
+Return JSON containing the selected `year` and `week`, or `{"year": null, "week": null}` when no picks exist. The maximum competition year/week determines the selected week, not the newest insertion timestamp, current calendar date, or whether results are complete. Backfilling an older week must not move the selected week backward. The React `/madisonsc` page replaces its browser-history entry with `/madisonsc/picks/{year}/{week}` when a latest week exists; an empty result renders a clear “No picks found” state with the shared navigation. A dashboard or season-selection landing page may be added later.
 
 ### Administrator pick submission
 
@@ -131,9 +131,9 @@ Each shorthand entry contains a team code, a signed spread or `PK`, and an optio
 
 Insert all five picks atomically and return HTTP `200` with a JSON object `{ "success": true }`. Validate the contestant exists, require exactly five entries, and reject a contestant/year/week that already contains picks with `409` rather than appending a sixth pick or silently replacing data. One invalid entry must leave the batch unsaved. The unique key alone prevents duplicate teams, not more than five different teams, so check both request size and existing weekly picks. Historical partial data requires manual reconciliation before submitting a full batch; there is no partial-fill endpoint. Missing/invalid secrets should return `401`; document that conventional error status even though the existing service uses `400` for an invalid secret.
 
-### Proposed weekly response
+### Weekly response
 
-The proposed weekly response includes `year`, `week`, season label, and ordered contestant summaries containing ID, name, rank, cumulative win percentage, cumulative record, weekly record, and that week's picks. Return records as numeric fields (`wins`, `losses`, `ties`) rather than only formatted strings. Calculate standings in Java/SQL; React formats and displays them. Specify the percentage representation and no-results value with the calculation during implementation, then define DTOs and representative response examples.
+The implemented weekly response includes `year`, `week`, season label, available competition years, and ordered contestant summaries containing ID, name, rank, cumulative win percentage, cumulative record, weekly record, and that week's picks. Records use numeric fields (`wins`, `losses`, `ties`) rather than only formatted strings. Spring calculates standings and React formats and displays them.
 
 ## Authentication and authorization
 
@@ -163,7 +163,8 @@ Use the shared React/TypeScript conventions, `SiteLayout`, and `SiteNavigation` 
 - Put backend code under `backend/src/main/java/xyz/raymoore/madisonsc/`, organized into `controller`, `service`, `domain`, `repository`, and `dto` as needed. Put mapped records in `domain`, repository interfaces in `repository`, and future HTTP DTOs in `dto`, following the shared package and inner `Builder` conventions in `PROJECT.md`. Keep typed API calls and team/result types aligned with the backend contract.
 - Define React routes for `/madisonsc` and `/madisonsc/picks/:year/:week`. Use relative API paths such as `/api/madisonsc/picks/13/1` through Vite's `/api` proxy during development.
 - The shared Madison SC link points to `/madisonsc`. React calls the latest-week API, then loads the selected weekly data. A normal navigation link also works on a direct browser visit.
-- Keep historical year/week navigation on the weekly view, separate from the global menu, with the selected week clearly marked. A separate selection dashboard is deferred.
+- Keep historical navigation on the weekly view as controlled Year and Week dropdowns, separate from the global menu. The Year dropdown contains competition years with picks, plus a directly selected year when needed; the Week dropdown contains weeks 1–18. A separate selection dashboard is deferred.
+- Show “Year 12 has been suspended in loving memory of Reyna” in a visually distinct memorial banner on every Year 12 weekly view, matching the archived site's year-specific behavior.
 - Keep historical links such as `/madisonsc/picks/11/18` directly navigable and refreshable. Restrict the production SPA fallback to GET/HEAD UI requests so the administrator POST on the same weekly path reaches Spring Boot.
 - Cancel or ignore stale requests when the selected year/week changes. Provide loading, error, empty, and success states, and textual result labels alongside colors. Retain team logos, spreads, results, and weekly/cumulative records from the reference page.
 - Use controlled inputs when adding the later Picks Submission page. Result-entry and contestant-management pages remain outside scope.
@@ -173,17 +174,16 @@ Use the shared React/TypeScript conventions, `SiteLayout`, and `SiteNavigation` 
 
 Apply the shared test tooling and delivery checks in the root plan, with these Madison SC acceptance cases:
 
-- Use JUnit for cumulative win-percentage ranking once its calculation is specified, including `1-1-3` ranking above `2-3-0`, identical records sharing rank, historical week cutoffs, and pending/no-results cases. Also cover competition-year labels, exactly five picks, distinct teams, and shorthand validation.
+- When unit tests are explicitly requested, use JUnit for cumulative win-percentage ranking, including `1-1-3` ranking above `2-3-0`, identical records sharing rank, historical week cutoffs, and pending/no-results cases. Also cover competition-year labels, exactly five picks, distinct teams, and shorthand validation.
 - Use real Postgres integration tests for contestant/pick mappings, UUID and timestamp defaults, enum conversion, uniqueness, and transaction rollback. Cover idempotent schema initialization, baseline-at-zero adoption of the existing schema, and `snake_case` column mappings.
 - Cover PK rendering with both NULL and false directions.
 - Test administrator POST requests with valid, missing, invalid, and unconfigured secrets. Verify one invalid pick cannot leave a partially inserted batch, an existing week cannot receive five more picks, and historical backfill remains allowed. Google-login tests belong to the later phase.
-- Use Vitest and React Testing Library for request failures, empty weeks, shared rank display, and integration with shared navigation.
+- Use Vitest and React Testing Library for request failures, empty weeks, medal display for the top three ranks, and integration with shared navigation.
 - Verify `/madisonsc` loads through both Vite and the packaged app, requests the latest year/week through the API, renders the selected weekly data, and handles an empty database. Use test fixtures with different insertion and competition-year/week orderings; the selected week must remain data-driven as new picks arrive.
 - Verify direct navigation and refresh for historical weekly routes, and confirm administrator POST requests receive JSON instead of the SPA fallback.
 
 ## Remaining decisions
 
-- Define the win-percentage calculation during source implementation, including tie treatment, pending/no-results handling, precision, and response representation. The ranking criterion and the `1-1-3` above `2-3-0` example are settled; do not substitute a points-based approximation.
 - In the later Google-login phase, apply the shared browser authentication design to the Picks Submission page. This does not block secret-authenticated submissions.
 
 Competition-year meaning, ranking by cumulative win percentage, five picks per week, administrator-managed submissions, unrestricted historical backfill, manual contestant/result maintenance, PK direction handling, use of the existing production database, idempotent SQL, and API-driven latest-week selection are settled requirements. Do not reopen them or add management interfaces as prerequisites to the proof of concept.

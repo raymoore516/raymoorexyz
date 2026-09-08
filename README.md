@@ -6,7 +6,7 @@ The project is also a learning exercise in Spring Boot, React, TypeScript, and A
 
 ## Status
 
-The database foundation is implemented: local PostgreSQL through Docker Compose, Flyway migrations, Spring Data JDBC domain records and repositories for contestants and picks, and a Spring Boot application that lists contestants and serves a contestant endpoint. The React/TypeScript frontend now has Home and Madison SC pages with shared navigation. More HTTP endpoints and Madison SC views are still planned.
+The database foundation is implemented: local PostgreSQL through Docker Compose, Flyway migrations, and Spring Data JDBC domain records and repositories for contestants and picks. The Spring Boot application serves public contestant, latest-week, and weekly-picks endpoints. The React/TypeScript frontend has shared navigation, redirects `/madisonsc` to the latest populated week, and renders responsive weekly standings with an explicit empty state. Administrator pick submission remains planned.
 
 ## Developer prerequisites (macOS / Homebrew)
 
@@ -84,12 +84,14 @@ Open **http://localhost:5173/** in your browser. The page displays **Hello World
 | `src/main.tsx` | Starts React, mounts `App` into that element, and imports the CSS. |
 | `src/App.tsx` | Top-level component; selects the current page and renders shared navigation. |
 | `src/app/pages/HomePage.tsx` | Global home page returning the heading and paragraph. Edit the text here. |
-| `src/projects/madisonsc/pages/MadisonScPage.tsx` | Madison SC landing page that loads contestants from the API. |
+| `src/projects/madisonsc/pages/MadisonScPage.tsx` | Madison SC landing page that finds and navigates to the latest populated week, or displays the empty state. |
+| `src/projects/madisonsc/pages/WeeklyPicksPage.tsx` | Weekly standings view with Year/Week selectors and responsive contestant/pick cards. |
+| `src/projects/madisonsc/api/madisonScApi.ts` | Typed frontend contracts and fetch calls for Madison SC JSON endpoints. |
 | `src/app/styles.css` | Shared CSS, including the responsive slide-out navigation. |
 | `tsconfig.json` | Enables strict TypeScript checking. |
 | `vite.config.ts` | Configures React support and the local server ports. |
 
-A **React component** is a function describing a piece of the UI. **JSX** is the HTML-like syntax returned by that function; React turns it into browser elements. A `.tsx` file is TypeScript that can contain JSX. **TypeScript** adds type checking to JavaScript during development; the browser receives JavaScript after the build. React Router handles navigation between `/` and `/madisonsc`. The shared header identifies the current page, and its hamburger button opens the navigation drawer on desktop and mobile. The global home page itself still has no state or API calls and does not need a Spring controller. See [React's TypeScript introduction](https://react.dev/learn/typescript).
+A **React component** is a function describing a piece of the UI. **JSX** is the HTML-like syntax returned by that function; React turns it into browser elements. A `.tsx` file is TypeScript that can contain JSX. **TypeScript** adds type checking to JavaScript during development; the browser receives JavaScript after the build. React Router handles navigation between `/`, `/madisonsc`, and weekly Madison SC URLs. The shared header identifies the current page, and its hamburger button opens the navigation drawer on desktop and mobile. The global home page itself still has no state or API calls and does not need a Spring controller. See [React's TypeScript introduction](https://react.dev/learn/typescript).
 
 ### Frontend verification and production build
 
@@ -103,7 +105,7 @@ npm run preview
 
 `typecheck` checks types without writing compiled files. `build` also runs that check, then produces deployable HTML, JavaScript, and CSS in `frontend/dist/`. Vite alone transpiles TypeScript without type-checking, so the separate check is intentional. `preview` serves the last build at **http://localhost:4173/**; rebuild after edits when using preview, and stop it with **Ctrl+C**. Preview is a local build check, not the production server. No frontend automated tests or lint command are configured in this initial scaffold.
 
-npm manages only `frontend/`; Maven continues to manage the Java backend. npm is used in local development and in CI/deployment builds to install dependencies and build the static frontend. The eventual production setup will package these files into Spring Boot, so the running Java application will not need Node or npm. The current backend serves `GET /api/madisonsc/contestants`, and Vite proxies that path from port 5173 to Spring Boot on port 8080 during development. The home page itself continues to need no database calls.
+npm manages only `frontend/`; Maven continues to manage the Java backend. npm is used in local development and in CI/deployment builds to install dependencies and build the static frontend. The eventual production setup will package these files into Spring Boot, so the running Java application will not need Node or npm. The current backend serves public Madison SC JSON under `/api/madisonsc`, and Vite proxies `/api` from port 5173 to Spring Boot on port 8080 during development. The home page itself continues to need no database calls.
 
 ## Local developer setup: PostgreSQL on localhost:5432
 

@@ -1,5 +1,6 @@
 import HomePage from './app/pages/HomePage';
 import MadisonScPage from './projects/madisonsc/pages/MadisonScPage';
+import WeeklyPicksPage from './projects/madisonsc/pages/WeeklyPicksPage';
 import NavBar from './app/components/NavBar';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
@@ -19,6 +20,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/madisonsc" element={<MadisonScPage />} />
+        <Route path="/madisonsc/picks/:year/:week" element={<WeeklyPicksPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
