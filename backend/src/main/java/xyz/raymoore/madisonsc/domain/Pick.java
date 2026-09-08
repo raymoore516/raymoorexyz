@@ -21,12 +21,10 @@ public record Pick(
         String result
 ) {
 
-    @SuppressWarnings("unused")
     public static Builder builder() {
         return new Builder();
     }
 
-    @SuppressWarnings("unused")
     public static final class Builder {
         private UUID pickId;
         private Instant entryDate;
