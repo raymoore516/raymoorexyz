@@ -4,13 +4,13 @@
 
 Build an NFL pick'em league tracker for weekly picks against the spread, results, and cumulative standings as a project within the raymoore.xyz personal website. It will replace the existing Madison SC website.
 
-This is the implementation plan for AI coding agents. The database foundation is implemented with Flyway V1, mapped `Contestant` and `Pick` Java records in `xyz.raymoore.madisonsc.domain`, repositories, and Spring MVC contestant/latest-week/weekly-picks endpoints. The React frontend resolves `/madisonsc` through the latest-week API, navigates to the populated weekly route, and renders responsive standings cards or an explicit empty state. Administrator submission remains planned. Proposed API contracts and unresolved business rules are labeled explicitly.
+This is the implementation plan for AI coding agents. The database foundation is implemented with Flyway V1, mapped `Contestant` and `Pick` Java records in `xyz.raymoore.madisonsc.domain`, repositories, and Spring MVC contestant/latest-week/weekly-picks endpoints. The React frontend resolves `/madisonsc` through the latest-week API, navigates to the populated weekly route, and renders responsive standings cards or an explicit empty state. The secret-protected administrator submission API is implemented. Proposed API contracts and unresolved business rules are labeled explicitly.
 
 The [root PROJECT.md](../../PROJECT.md) owns shared technologies, application architecture, authentication strategy, database migration conventions, and site navigation. This file owns Madison SC business requirements, its database schema, routes, UI behavior, and acceptance criteria. Read [AGENTS.md](../../AGENTS.md) for collaboration guidance and [README.md](../../README.md) for developer setup and day-to-day workflows. Keep these documents consistent as decisions are made.
 
 ## Initial scope and later work
 
-- **Proof of concept:** public Madison SC pages using the shared desktop/mobile hamburger navigation, five-pick administrator submissions using the `api-secret` HTTP header, Postgres persistence, and Flyway SQL migrations.
+- **Proof of concept:** public Madison SC pages using the shared desktop/mobile hamburger navigation, incremental administrator pick submissions using the `api-secret` HTTP header, Postgres persistence, and Flyway SQL migrations.
 - **Manual administration:** Ray is the sole administrator. He creates contestants with SQL before submitting their picks, can backfill historical weeks at any time, and records or corrects results with SQL when needed. Do not build contestant-management or result-editing APIs/screens.
 - **Later:** a Picks Submission page protected by Spring Security and Google OAuth 2.0 / OpenID Connect. JWT/session design is deferred and must not block the proof of concept.
 - Do not add contestant self-service, multi-administrator coordination, submission deadlines, automatic grading, or edit workflows to the initial scope.
@@ -44,7 +44,7 @@ Database invariants and mapping rules:
 - V1 uses the archived migration as reference, with snake_case columns as confirmed during implementation. Its pick index names are `pick_contestant_id`, `pick_year`, `pick_week`, `pick_team`, `pick_result`, and unique `pick_unique`. The index `pick_contestant_id` reflects the full `contestant_id` column name. Production currently has `pick_contestantid`; rename that index when reconciling the production columns before V1 runs, so V1 does not create an equivalent duplicate index. The name uniqueness constraint already creates an index, so V1 omits the redundant `contestant_name` index on fresh databases and preserves it where it already exists. Review indexes against actual queries as those are added.
 - Map UUIDs to Java `UUID`, timestamps to `Instant`, and `numeric(3,1)` to `BigDecimal`. Validate nonnegative magnitude, at most one decimal place, and a maximum of `99.9`.
 - Store `GB +3.5` as `team = GB`, `underdog = true`, `line = 3.5`; a negative spread uses `underdog = false`. Display zero as `PK`.
-- Use explicit team and result values. If Java enums use uppercase names, supply converters for lowercase stored results. Validate unknown values instead of interpreting them as pending.
+- Define valid NFL team codes in `xyz.raymoore.madisonsc.category.Team`. Submission parsing uses the enum for validation and converts the selected team to its uppercase code at the string-backed `Pick` persistence boundary. Use explicit result values and validate unknown values instead of interpreting them as pending.
 - A zero line is a PK (Pick Em) game. Its `underdog` value may be NULL or false; direction is irrelevant because the UI always displays `PK` without a sign when `line = 0`. Check the line before the direction. Preserve the nullable SQL column and map it to Java `Boolean`; new PK submissions may consistently write false. A nonzero line requires a known direction; handle a malformed existing row explicitly rather than inventing a sign. No nullability change or data rewrite is needed.
 - “Name normalization” means rules such as trimming spaces or treating `Ray` and `ray` as equivalent. Keep the existing case-insensitive contestant-name lookup for submissions and preserve the stored display name. The SQL uniqueness constraint is case-sensitive, so the administrator should avoid names differing only by case. Reject an ambiguous lookup with `409` instead of selecting an arbitrary row; a new normalization system or schema change is not required.
 - A contestant must exist before a pick can reference its UUID. Ray creates contestants by manual SQL insert; the API never creates them implicitly. Contestants do not need Google accounts or a user-to-contestant association for this administrator-managed workflow.
@@ -61,7 +61,7 @@ The live [Year 11, Week 18 page](https://raymoore.xyz/madisonsc/picks/11/18) is 
 
 Confirmed rules:
 
-- Each contestant submits **exactly five picks per week**, with distinct teams as required by the unique key. A missing submission remains empty; do not manufacture picks or losses.
+- Each contestant may have **up to five picks per week**, with distinct teams as required by the unique key. Ray can submit those picks incrementally in batches of one to five. A missing or partial submission remains as-is; do not manufacture picks or losses.
 - Show picks and a win-loss-tie record for the selected week, plus a cumulative record through that week.
 - Rank the weekly view by **cumulative win percentage through the selected week**, highest first. Pending results do not count as completed wins, losses, or ties in the displayed records.
 - Later weeks must not contribute to an earlier week's record or ranking.
@@ -76,7 +76,7 @@ Calculate competition ranks as `1, 2, 2, 4`, with tied contestants sharing a ran
 ### Administrator workflow
 
 1. Ray inserts a contestant into `madisonsc.contestant` using SQL, before submitting picks for that name.
-2. Ray sends a five-pick batch to the secret-protected POST endpoint. It may include initial results for historical backfills or leave results pending.
+2. Ray sends a batch of one to five picks to the secret-protected POST endpoint. He can submit multiple batches until that contestant has five picks for the week. A batch may include initial results for historical backfills or leave results pending.
 3. Subsequent result entry/corrections and other data corrections are manual SQL operations. There is no result-update API or UI in the proof of concept.
 4. Public readers view the updated data on the next fetch/reload. Live push updates are unnecessary.
 
@@ -84,7 +84,7 @@ Keep contestant data and operational pick/result changes separate from Flyway sc
 
 ## HTTP API and browser routes
 
-Retain the existing administrator submission path, header, and shorthand body for the proof of concept. The public contestant, latest-week, and weekly-picks JSON APIs are implemented; administrator submission remains planned.
+Retain the existing administrator submission header and shorthand body for the proof of concept. Unlike the archived Javalin route, the Spring endpoint lives under `/api` because it exchanges JSON rather than rendering the React route. The public contestant, latest-week, weekly-picks, and administrator submission JSON APIs are implemented.
 
 | Method | Path | Purpose / intended access |
 | --- | --- | --- |
@@ -93,9 +93,9 @@ Retain the existing administrator submission path, header, and shorthand body fo
 | GET | `/api/madisonsc/contestants` | Public contestant list, sorted alphabetically by name. |
 | GET | `/madisonsc/picks/{year}/{week}` | React weekly view. |
 | GET | `/api/madisonsc/picks/{year}/{week}` | Public weekly view data, including cumulative standings. |
-| POST | `/madisonsc/picks/{year}/{week}` | Administrator-only five-pick submission using `api-secret`; JSON response. |
+| POST | `/api/madisonsc/picks/{year}/{week}` | Administrator-only submission of one to five picks using `api-secret`; JSON response. |
 
-GET and POST intentionally use the same weekly path for different purposes. Restrict the SPA fallback by HTTP method, and ensure the secret check matches the POST route even though it is outside `/api`. There are no contestant CRUD, result PATCH, or `/api/auth/me` endpoints in the initial scope.
+The JSON GET and POST intentionally use the same `/api/madisonsc/picks/{year}/{week}` resource and are distinguished by HTTP method. The React browser route remains separate under `/madisonsc`. There are no contestant CRUD, result PATCH, or `/api/auth/me` endpoints in the initial scope.
 
 ### Madison SC landing page
 
@@ -129,7 +129,7 @@ Submission body (five distinct teams; fictional example):
 
 Each shorthand entry contains a team code, a signed spread or `PK`, and an optional `W`, `L`, or `T`. Missing result means pending. Parse the format deliberately: reject unknown teams/results, missing signs on non-`PK` spreads, invalid decimals, extra tokens, and duplicate teams with a useful validation error. Keep the request contract; use typed values inside the service and persistence layers. A structured request DTO for a future UI is deferred.
 
-Insert all five picks atomically and return HTTP `200` with a JSON object `{ "success": true }`. Validate the contestant exists, require exactly five entries, and reject a contestant/year/week that already contains picks with `409` rather than appending a sixth pick or silently replacing data. One invalid entry must leave the batch unsaved. The unique key alone prevents duplicate teams, not more than five different teams, so check both request size and existing weekly picks. Historical partial data requires manual reconciliation before submitting a full batch; there is no partial-fill endpoint. Missing/invalid secrets should return `401`; document that conventional error status even though the existing service uses `400` for an invalid secret.
+Accept one to five picks per request, insert the submitted batch atomically, and return HTTP `200` with a JSON object `{ "success": true }`. Validate the contestant exists and count that contestant's existing picks for the selected year/week while holding the contestant lock. Reject the request with `409` if the existing count plus the batch size would exceed five. Reject duplicate teams within the batch or across earlier batches; never silently replace data. One invalid entry must leave the batch unsaved. Missing/invalid secrets return `401`.
 
 ### Weekly response
 
@@ -139,7 +139,7 @@ The implemented weekly response includes `year`, `week`, season label, available
 
 Follow the [site authentication strategy in PROJECT.md](../../PROJECT.md). Public Madison SC pages and JSON reads require no login. Ray is the sole administrator.
 
-For the proof of concept, protect `POST /madisonsc/picks/{year}/{week}` with the `api-secret` header backed by `APP_API_SECRET`. Scope the authentication filter and any header-only CSRF exemption to this exact POST route, including the fact that it is outside `/api`. Missing or invalid credentials return `401`; an absent or blank configured secret must prevent writes. The React application never receives the secret. Local API-client submissions go directly to `http://localhost:8080/madisonsc/picks/{year}/{week}`.
+For the proof of concept, protect `POST /api/madisonsc/picks/{year}/{week}` with the `api-secret` header backed by `APP_API_SECRET`. Scope the authentication filter and any header-only CSRF exemption to this exact POST route. Missing or invalid request credentials return `401`; missing application configuration prevents startup, while a configured but blank secret prevents writes. The React application never receives the secret. Local API-client submissions can use Vite's `/api` proxy or go directly to `http://localhost:8080/api/madisonsc/picks/{year}/{week}`.
 
 A Picks Submission page belongs to the later Google-login phase. It must authorize Ray's configured identity on the backend and must never contain the shared API secret. Browser session/JWT decisions and whether to retain the separate secret-authenticated API are deferred as described in the root plan. Contestants do not need login accounts or a user-to-contestant association.
 
@@ -153,19 +153,19 @@ The `madisonsc` schema belongs to this project within the shared `raymoorexyz` d
 - Treat `Contestant` and `Pick` as separate Spring Data JDBC aggregate roots. A pick references its contestant by UUID or `AggregateReference`; do not place every historical pick in a persistence-managed contestant collection.
 - Insert weekly pick batches in a Spring-managed service transaction. Fetch weekly summaries in bounded queries, avoiding one contestant lookup per row. Keep standings calculation in small, testable Java methods.
 - There is one administrator and no application edit workflow: do not add version columns, conflict-resolution screens, or custom concurrency infrastructure. Keep ordinary database constraints and atomic batch writes.
-- Apply Bean Validation to nested pick entries and enforce cross-field and league rules in services. Enforce the secret and exactly-five-picks rule on the backend; historical backfill remains allowed.
+- Apply Bean Validation to nested pick entries and enforce cross-field and league rules in services. Enforce the secret, one-to-five request size, and five-total-picks cap on the backend; historical backfill remains allowed.
 
 ## Frontend organization and navigation
 
 Use the shared React/TypeScript conventions, `SiteLayout`, and `SiteNavigation` from the root plan.
 
 - Put Madison SC pages in `frontend/src/projects/madisonsc/pages/` and project components in `frontend/src/projects/madisonsc/components/`. The project landing page is `MadisonScPage.tsx`; suggested weekly components are `WeekNavigation`, `ContestantCard`, `RecordSummary`, and `PickCard`. Shared application pages and components belong under `frontend/src/app/`.
-- Put backend code under `backend/src/main/java/xyz/raymoore/madisonsc/`, organized into `controller`, `service`, `domain`, `repository`, and `dto` as needed. Put mapped records in `domain`, repository interfaces in `repository`, and future HTTP DTOs in `dto`, following the shared package and inner `Builder` conventions in `PROJECT.md`. Keep typed API calls and team/result types aligned with the backend contract.
+- Put backend code under `backend/src/main/java/xyz/raymoore/madisonsc/`, organized into `category`, `controller`, `service`, `domain`, `repository`, and `dto` as needed. Put fixed project values such as `Team` in `category`, mapped records in `domain`, repository interfaces and classes in `repository`, and HTTP DTOs in `dto`, following the shared package and inner `Builder` conventions in `PROJECT.md`. Keep typed API calls and team/result types aligned with the backend contract.
 - Define React routes for `/madisonsc` and `/madisonsc/picks/:year/:week`. Use relative API paths such as `/api/madisonsc/picks/13/1` through Vite's `/api` proxy during development.
 - The shared Madison SC link points to `/madisonsc`. React calls the latest-week API, then loads the selected weekly data. A normal navigation link also works on a direct browser visit.
 - Keep historical navigation on the weekly view as controlled Year and Week dropdowns, separate from the global menu. The Year dropdown contains competition years with picks, plus a directly selected year when needed; the Week dropdown contains weeks 1–18. A separate selection dashboard is deferred.
 - Show “Year 12 has been suspended in loving memory of Reyna” in a visually distinct memorial banner on every Year 12 weekly view, matching the archived site's year-specific behavior.
-- Keep historical links such as `/madisonsc/picks/11/18` directly navigable and refreshable. Restrict the production SPA fallback to GET/HEAD UI requests so the administrator POST on the same weekly path reaches Spring Boot.
+- Keep historical links such as `/madisonsc/picks/11/18` directly navigable and refreshable. Restrict the production SPA fallback to GET/HEAD UI requests; administrator submissions use the separate `/api` namespace.
 - Cancel or ignore stale requests when the selected year/week changes. Provide loading, error, empty, and success states, and textual result labels alongside colors. Retain team logos, spreads, results, and weekly/cumulative records from the reference page.
 - Use controlled inputs when adding the later Picks Submission page. Result-entry and contestant-management pages remain outside scope.
 - Initial UI acceptance includes narrow mobile and desktop viewports, public empty states, and shared menu keyboard operation.
@@ -174,10 +174,10 @@ Use the shared React/TypeScript conventions, `SiteLayout`, and `SiteNavigation` 
 
 Apply the shared test tooling and delivery checks in the root plan, with these Madison SC acceptance cases:
 
-- When unit tests are explicitly requested, use JUnit for cumulative win-percentage ranking, including `1-1-3` ranking above `2-3-0`, identical records sharing rank, historical week cutoffs, and pending/no-results cases. Also cover competition-year labels, exactly five picks, distinct teams, and shorthand validation.
+- When unit tests are explicitly requested, use JUnit for cumulative win-percentage ranking, including `1-1-3` ranking above `2-3-0`, identical records sharing rank, historical week cutoffs, and pending/no-results cases. Also cover competition-year labels, incremental pick batches, the five-total-picks cap, distinct teams, and shorthand validation.
 - Use real Postgres integration tests for contestant/pick mappings, UUID and timestamp defaults, enum conversion, uniqueness, and transaction rollback. Cover idempotent schema initialization, baseline-at-zero adoption of the existing schema, and `snake_case` column mappings.
 - Cover PK rendering with both NULL and false directions.
-- Test administrator POST requests with valid, missing, invalid, and unconfigured secrets. Verify one invalid pick cannot leave a partially inserted batch, an existing week cannot receive five more picks, and historical backfill remains allowed. Google-login tests belong to the later phase.
+- Test administrator POST requests with valid, missing, invalid, and unconfigured secrets. Verify one invalid pick cannot leave a partially inserted batch, incremental batches can reach five total picks, a batch cannot exceed that total, and historical backfill remains allowed. Google-login tests belong to the later phase.
 - Use Vitest and React Testing Library for request failures, empty weeks, medal display for the top three ranks, and integration with shared navigation.
 - Verify `/madisonsc` loads through both Vite and the packaged app, requests the latest year/week through the API, renders the selected weekly data, and handles an empty database. Use test fixtures with different insertion and competition-year/week orderings; the selected week must remain data-driven as new picks arrive.
 - Verify direct navigation and refresh for historical weekly routes, and confirm administrator POST requests receive JSON instead of the SPA fallback.
@@ -186,4 +186,4 @@ Apply the shared test tooling and delivery checks in the root plan, with these M
 
 - In the later Google-login phase, apply the shared browser authentication design to the Picks Submission page. This does not block secret-authenticated submissions.
 
-Competition-year meaning, ranking by cumulative win percentage, five picks per week, administrator-managed submissions, unrestricted historical backfill, manual contestant/result maintenance, PK direction handling, use of the existing production database, idempotent SQL, and API-driven latest-week selection are settled requirements. Do not reopen them or add management interfaces as prerequisites to the proof of concept.
+Competition-year meaning, ranking by cumulative win percentage, a maximum of five picks per contestant/week through incremental administrator-managed submissions, unrestricted historical backfill, manual contestant/result maintenance, PK direction handling, use of the existing production database, idempotent SQL, and API-driven latest-week selection are settled requirements. Do not reopen them or add management interfaces as prerequisites to the proof of concept.
