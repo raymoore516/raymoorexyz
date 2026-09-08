@@ -6,11 +6,107 @@ The project is also a learning exercise in Spring Boot, React, TypeScript, and A
 
 ## Status
 
-The database foundation is implemented: local PostgreSQL through Docker Compose, Flyway migrations, Spring Data JDBC domain records and repositories for contestants and picks, and a Spring Boot command-line application that lists contestants through a repository and exits. HTTP endpoints and the frontend are still planned.
+The database foundation is implemented: local PostgreSQL through Docker Compose, Flyway migrations, Spring Data JDBC domain records and repositories for contestants and picks, and a Spring Boot command-line application that lists contestants through a repository and exits. A minimal React/TypeScript home page now runs through Vite. HTTP endpoints, navigation, and Madison SC pages are still planned.
+
+## Developer prerequisites (macOS / Homebrew)
+
+Install [Homebrew](https://brew.sh/) first if `brew --version` does not work. For the full project, install these tools; skip anything you already have at the required version:
+
+```sh
+brew install git node@24 openjdk@25
+brew install --cask docker-desktop
+```
+
+| Tool | Why it is needed |
+| --- | --- |
+| Git | Clone the repository and manage source changes. An existing Git installation is fine. |
+| [Node.js 24](https://formulae.brew.sh/formula/node%4024) | Runs npm, Vite, and the frontend build tools. |
+| [OpenJDK 25](https://formulae.brew.sh/formula/openjdk%4025) | Compiles and runs the Java/Spring Boot backend. An existing JDK 25 is fine. |
+| [Docker Desktop](https://formulae.brew.sh/cask/docker-desktop) | Runs local PostgreSQL; includes Docker Engine, the Docker CLI, and Docker Compose. Open Docker Desktop once and finish its setup. |
+
+Optional editors used in this project's workflow:
+
+```sh
+brew install --cask intellij-idea visual-studio-code
+```
+
+[IntelliJ IDEA](https://formulae.brew.sh/cask/intellij-idea) is used for Java; [VS Code](https://formulae.brew.sh/cask/visual-studio-code) is used for the frontend. Keep your existing editors if already installed.
+
+The versioned Node and Java formulas need shell configuration. Add these lines once to `~/.zshrc` (adjust existing Node/Java settings rather than adding duplicates):
+
+```sh
+export JAVA_HOME="$(brew --prefix openjdk@25)/libexec/openjdk.jdk/Contents/Home"
+export PATH="$(brew --prefix node@24)/bin:$JAVA_HOME/bin:$PATH"
+```
+
+Reload your shell configuration and check the installations:
+
+```sh
+source ~/.zshrc
+git --version
+node --version
+npm --version
+java --version
+javac --version
+docker --version
+docker compose version
+```
+
+Expect Node **24.x** and Java **25**. In IntelliJ, select JDK 25; if it is not automatically listed, add the JDK directory printed by `echo "$JAVA_HOME"` as a local SDK.
+
+There is no separate `brew install` needed for Maven, PostgreSQL, React, TypeScript, Vite, Spring Boot, or Flyway. The checked-in Maven Wrapper downloads Maven **3.9.11** and resolves backend dependencies. Node includes npm, `npm ci` installs frontend dependencies, and Docker Compose downloads PostgreSQL **15.19**. For frontend-only work, Node and an editor are sufficient.
+
+## Local developer setup: frontend on localhost:5173
+
+The frontend was verified with Node **24.20.0**, also recorded in `frontend/.nvmrc` for developers using nvm. Node runs the frontend development tools; React runs in your browser.
+
+From the repository root:
+
+```sh
+cd frontend
+node --version
+npm --version
+npm ci
+npm run dev
+```
+
+`npm ci` installs the exact dependencies recorded in `package-lock.json` into `node_modules/`. Run it on initial setup or after pulling dependency changes. Think of `package.json` as the frontend's build/dependency manifest, similar in purpose to Maven's `pom.xml`; its `scripts` section defines the `npm run ...` commands. Commit `package-lock.json`, but not `node_modules/` or generated `dist/` files. To intentionally change dependencies, use `npm install --save-exact <package>` (or add `--save-dev` for build tools) and commit the updated manifest and lockfile together.
+
+Open **http://localhost:5173/** in your browser. The page displays **Hello World** and **This site is a constant work in progress...**. It needs no Spring process, Docker, PostgreSQL, or `.env` configuration. Leave the terminal running while developing and use **Ctrl+C** to stop it. Run `npm run dev` again for subsequent sessions.
+
+**Vite** is the frontend development server and build tool. Saving a source file updates the page through React Fast Refresh, usually without a manual reload. The development port is fixed at **5173** with `strictPort: true`; if another process owns it, stop that process instead of looking for a silently changed port. The configuration lives in `frontend/vite.config.ts`. See [Vite's getting-started guide](https://vite.dev/guide/).
+
+### Understanding the frontend files
+
+| File under `frontend/` | Role |
+| --- | --- |
+| `index.html` | Browser HTML document containing the `root` element where React renders. |
+| `src/main.tsx` | Starts React, mounts `App` into that element, and imports the CSS. |
+| `src/App.tsx` | Top-level component; currently renders `HomePage`. |
+| `src/pages/HomePage.tsx` | A JavaScript-style function returning the page's heading and paragraph. Edit the text here. |
+| `src/styles.css` | Ordinary CSS for fonts, spacing, and layout. |
+| `tsconfig.json` | Enables strict TypeScript checking. |
+| `vite.config.ts` | Configures React support and the local server ports. |
+
+A **React component** is a function describing a piece of the UI. **JSX** is the HTML-like syntax returned by that function; React turns it into browser elements. A `.tsx` file is TypeScript that can contain JSX. **TypeScript** adds type checking to JavaScript during development; the browser receives JavaScript after the build. This page has no state, API calls, router, or navigation yet. It does not need a Spring controller. See [React's TypeScript introduction](https://react.dev/learn/typescript).
+
+### Frontend verification and production build
+
+Run these commands from `frontend/`:
+
+```sh
+npm run typecheck
+npm run build
+npm run preview
+```
+
+`typecheck` checks types without writing compiled files. `build` also runs that check, then produces deployable HTML, JavaScript, and CSS in `frontend/dist/`. Vite alone transpiles TypeScript without type-checking, so the separate check is intentional. `preview` serves the last build at **http://localhost:4173/**; rebuild after edits when using preview, and stop it with **Ctrl+C**. Preview is a local build check, not the production server. No frontend automated tests or lint command are configured in this initial scaffold.
+
+npm manages only `frontend/`; Maven continues to manage the Java backend. npm is used in local development and in CI/deployment builds to install dependencies and build the static frontend. The eventual production setup will package these files into Spring Boot, so the running Java application will not need Node or npm. That integration and backend HTTP serving are not implemented yet; the current Java runner still queries contestants and exits. The home page itself will continue to need no database calls.
 
 ## Local developer setup: PostgreSQL on localhost:5432
 
-Prerequisites: JDK 25 and Docker with Compose v2 (Docker Desktop on macOS). Start Docker Desktop first. The backend uses Spring Boot 4.1.1; the included Maven Wrapper downloads Maven 3.9.11, so a separate Maven installation is unnecessary.
+Complete the Java and Docker installations in the prerequisites above, then start Docker Desktop. The backend uses Spring Boot 4.1.1 and the included Maven Wrapper.
 
 PostgreSQL runs in a Docker container. You do not need a separate Postgres server installed on your Mac. Run the following from the repository root (`raymoore-xyz/`, where `compose.yaml` lives) in a bash/zsh terminal.
 
@@ -152,6 +248,6 @@ A monorepo with two top-level application directories:
 
 PostgreSQL stores application data, Flyway manages SQL schema changes, and Docker supports local infrastructure and deployment.
 
-Each project has its own schema within the shared `raymoorexyz` database. The shared hamburger navigation initially links to Home and Madison SC.
+Each project has its own schema within the shared `raymoorexyz` database. The planned shared hamburger navigation will link to Home and Madison SC; this first home page has no navigation.
 
 See [PROJECT.md](PROJECT.md) for shared technologies, architecture, authentication strategy, and implementation guidance. See the [Madison SC project plan](.projects/madisonsc/README.md) for league requirements, the contestant/pick schema, routes, and acceptance criteria. Future project plans belong under `.projects/<project>/README.md`.
