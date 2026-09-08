@@ -180,6 +180,8 @@ Use one `raymoorexyz` PostgreSQL database per environment. Each project gets its
 
 Use lowercase `snake_case` database identifiers and schema-qualified application SQL. Keep Flyway's shared history table in `public` and include each project schema in its managed schemas as projects are added.
 
+UUID primary-key and foreign-key column names must end in `_id`, such as `pick_id` and `contestant_id`. Name ordinary single-column indexes `<table>_<column>`, preserving the full column name: the index on `madisonsc.pick(contestant_id)` is `pick_contestant_id`, and the index on `madisonsc.pick(year)` is `pick_year`. Do not collapse `_id` to `id` in index names or add an `idx_` prefix or `_idx` suffix. For new multicolumn indexes, use `<table>_<column1>_<column2>...` in indexed-column order; use a concise descriptive name if needed to avoid PostgreSQL's identifier-length limit. Preserve established names for existing composite indexes, including Madison SC's `pick_unique`. Constraint-backed indexes may retain PostgreSQL's generated names, such as `contestant_pkey` and `contestant_name_key`; do not create duplicate indexes for primary-key or unique constraints. These conventions apply to all subprojects.
+
 Generate UUIDv4 IDs with PostgreSQL's built-in `pg_catalog.gen_random_uuid()` in column defaults. No UUID extension is required. See [PostgreSQL 15 UUID functions](https://www.postgresql.org/docs/15/functions-uuid.html).
 
 This root plan will also describe schema requirements for shared personal-site features, such as authentication, when those features need persistent data. No shared identity tables or auth schema are defined yet.
