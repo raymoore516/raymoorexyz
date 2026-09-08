@@ -85,11 +85,11 @@ Open **http://localhost:5173/** in your browser. The page displays **Hello World
 | `src/App.tsx` | Top-level component; selects the current page and renders shared navigation. |
 | `src/app/pages/HomePage.tsx` | Global home page returning the heading and paragraph. Edit the text here. |
 | `src/projects/madisonsc/pages/MadisonScPage.tsx` | Madison SC landing page that loads contestants from the API. |
-| `src/app/styles.css` | Ordinary shared CSS for fonts, spacing, navigation, and layout. |
+| `src/app/styles.css` | Shared CSS, including the responsive slide-out navigation. |
 | `tsconfig.json` | Enables strict TypeScript checking. |
 | `vite.config.ts` | Configures React support and the local server ports. |
 
-A **React component** is a function describing a piece of the UI. **JSX** is the HTML-like syntax returned by that function; React turns it into browser elements. A `.tsx` file is TypeScript that can contain JSX. **TypeScript** adds type checking to JavaScript during development; the browser receives JavaScript after the build. React Router now handles navigation between `/` and `/madisonsc`, while the global home page itself still has no state or API calls and does not need a Spring controller. See [React's TypeScript introduction](https://react.dev/learn/typescript).
+A **React component** is a function describing a piece of the UI. **JSX** is the HTML-like syntax returned by that function; React turns it into browser elements. A `.tsx` file is TypeScript that can contain JSX. **TypeScript** adds type checking to JavaScript during development; the browser receives JavaScript after the build. React Router handles navigation between `/` and `/madisonsc`. The shared header identifies the current page, and its hamburger button opens the navigation drawer on desktop and mobile. The global home page itself still has no state or API calls and does not need a Spring controller. See [React's TypeScript introduction](https://react.dev/learn/typescript).
 
 ### Frontend verification and production build
 

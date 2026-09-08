@@ -1,4 +1,4 @@
-import GlobalHomePage from './app/pages/HomePage';
+import HomePage from './app/pages/HomePage';
 import MadisonScPage from './projects/madisonsc/pages/MadisonScPage';
 import NavBar from './app/components/NavBar';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -17,7 +17,7 @@ export default function App() {
     <BrowserRouter>
       <NavBar />
       <Routes>
-        <Route path="/" element={<GlobalHomePage />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/madisonsc" element={<MadisonScPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
