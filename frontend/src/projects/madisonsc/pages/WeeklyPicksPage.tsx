@@ -69,7 +69,7 @@ export default function WeeklyPicksPage() {
 
   if (!validRoute) {
     return (
-      <main className="msc-page">
+      <main className="msc-page msc-weekly-picks-page">
         <h1>Madison SC</h1>
         <p className="msc-status msc-error" role="alert">Choose a positive year and a week from 1 through 18.</p>
       </main>
@@ -89,7 +89,7 @@ export default function WeeklyPicksPage() {
   }
 
   return (
-    <main className="msc-page">
+    <main className="msc-page msc-weekly-picks-page">
       <nav className="week-picker" aria-label="Choose Madison SC year and week">
         <label>
           <span>Year</span>

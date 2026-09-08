@@ -5,6 +5,10 @@
   font-family: Verdana, system-ui, sans-serif;
 }
 
+.msc-page.msc-weekly-picks-page {
+  max-width: 800px;
+}
+
 .msc-page .week-picker {
   display: flex;
   justify-content: center;
