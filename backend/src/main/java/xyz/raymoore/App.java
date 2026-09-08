@@ -4,7 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.core.JdbcTemplate;
+import xyz.raymoore.madisonsc.repository.ContestantRepository;
 
 @SpringBootApplication
 public class App {
@@ -16,9 +16,9 @@ public class App {
     }
 
     @Bean
-    CommandLineRunner listContestants(JdbcTemplate jdbc) {
+    CommandLineRunner listContestants(ContestantRepository repository) {
         return args -> {
-            var contestants = jdbc.queryForList("SELECT * FROM madisonsc.contestant");
+            var contestants = repository.findAll();
             System.out.println("Found " + contestants.size() + " contestant(s).");
             contestants.forEach(System.out::println);
         };

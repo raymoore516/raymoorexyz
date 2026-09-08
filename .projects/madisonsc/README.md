@@ -4,7 +4,7 @@
 
 Build an NFL pick'em league tracker for weekly picks against the spread, results, and cumulative standings as a project within the raymoore.xyz personal website. It will replace the existing Madison SC website.
 
-This is the implementation plan for AI coding agents. The database foundation is implemented with Flyway V1 and a startup JDBC contestant lookup; API and frontend features remain planned. Proposed API contracts and unresolved business rules are labeled explicitly.
+This is the implementation plan for AI coding agents. The database foundation is implemented with Flyway V1, mapped `Contestant` and `Pick` Java records in `xyz.raymoore.madisonsc.domain` with inner builders, and a startup contestant lookup using Spring Data JDBC `ContestantRepository.findAll()`; API and frontend features remain planned. Proposed API contracts and unresolved business rules are labeled explicitly.
 
 The [root PROJECT.md](../../PROJECT.md) owns shared technologies, application architecture, authentication strategy, database migration conventions, and site navigation. This file owns Madison SC business requirements, its database schema, routes, UI behavior, and acceptance criteria. Read [AGENTS.md](../../AGENTS.md) for collaboration guidance and [README.md](../../README.md) for developer setup and day-to-day workflows. Keep these documents consistent as decisions are made.
 
@@ -159,7 +159,7 @@ The `madisonsc` schema belongs to this project within the shared `raymoorexyz` d
 Use the shared React/TypeScript conventions, `SiteLayout`, and `SiteNavigation` from the root plan.
 
 - Put `MadisonScPage` and `WeeklyPicksPage` in `frontend/src/pages/madisonsc/` and project components in `frontend/src/components/madisonsc/`. Suggested weekly components are `WeekNavigation`, `ContestantCard`, `RecordSummary`, and `PickCard`.
-- Put backend code under `backend/src/main/java/xyz/raymoore/madisonsc/`, organized into `controller`, `dto`, `service`, `domain`, and `repository` as needed. Keep typed API calls and team/result types aligned with the backend contract.
+- Put backend code under `backend/src/main/java/xyz/raymoore/madisonsc/`, organized into `controller`, `service`, `domain`, `repository`, and `dto` as needed. Put mapped records in `domain`, repository interfaces in `repository`, and future HTTP DTOs in `dto`, following the shared package and inner `Builder` conventions in `PROJECT.md`. Keep typed API calls and team/result types aligned with the backend contract.
 - Define React routes for `/madisonsc` and `/madisonsc/picks/:year/:week`. Use relative API paths such as `/api/madisonsc/picks/13/1` through Vite's `/api` proxy during development.
 - The shared Madison SC link points to `/madisonsc`. React calls the latest-week API, then loads the selected weekly data. A normal navigation link also works on a direct browser visit.
 - Keep historical year/week navigation on the weekly view, separate from the global menu, with the selected week clearly marked. A separate selection dashboard is deferred.
