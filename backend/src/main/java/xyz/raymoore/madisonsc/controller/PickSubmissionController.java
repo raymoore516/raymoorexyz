@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import xyz.raymoore.madisonsc.dto.PickSubmissionRequest;
-import xyz.raymoore.madisonsc.dto.PickSubmissionResponse;
+import xyz.raymoore.madisonsc.dto.submission.PickSubmissionRequest;
+import xyz.raymoore.madisonsc.dto.submission.PickSubmissionResponse;
 import xyz.raymoore.madisonsc.service.PickSubmissionService;
 
 @RestController

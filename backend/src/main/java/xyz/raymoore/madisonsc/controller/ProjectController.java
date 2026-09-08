@@ -8,21 +8,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import xyz.raymoore.madisonsc.domain.Contestant;
-import xyz.raymoore.madisonsc.dto.LatestWeekResponse;
-import xyz.raymoore.madisonsc.dto.WeeklyPicksResponse;
+import xyz.raymoore.madisonsc.dto.query.LatestWeekResponse;
+import xyz.raymoore.madisonsc.dto.query.WeeklyPicksResponse;
 import xyz.raymoore.madisonsc.repository.ContestantRepository;
-import xyz.raymoore.madisonsc.service.PicksService;
+import xyz.raymoore.madisonsc.service.PickQueryService;
 
 @RestController
 @RequestMapping("/api/madisonsc")
 public class ProjectController {
 
     private final ContestantRepository contestantRepository;
-    private final PicksService picksService;
+    private final PickQueryService pickQueryService;
 
-    public ProjectController(ContestantRepository contestantRepository, PicksService picksService) {
+    public ProjectController(ContestantRepository contestantRepository, PickQueryService pickQueryService) {
         this.contestantRepository = contestantRepository;
-        this.picksService = picksService;
+        this.pickQueryService = pickQueryService;
     }
 
     @GetMapping("/contestants")
@@ -32,7 +32,7 @@ public class ProjectController {
 
     @GetMapping("/latest")
     public LatestWeekResponse getLatestWeek() {
-        return picksService.findLatestWeek();
+        return pickQueryService.findLatestWeek();
     }
 
     @GetMapping("/picks/{year}/{week}")
@@ -46,6 +46,6 @@ public class ProjectController {
         if (week < 1 || week > 18) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Week must be between 1 and 18");
         }
-        return picksService.findWeeklyPicks(year, week);
+        return pickQueryService.findWeeklyPicks(year, week);
     }
 }

@@ -12,20 +12,20 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import xyz.raymoore.madisonsc.domain.Contestant;
 import xyz.raymoore.madisonsc.domain.Pick;
-import xyz.raymoore.madisonsc.dto.LatestWeekResponse;
-import xyz.raymoore.madisonsc.dto.WeeklyPicksResponse;
+import xyz.raymoore.madisonsc.dto.query.LatestWeekResponse;
+import xyz.raymoore.madisonsc.dto.query.WeeklyPicksResponse;
 import xyz.raymoore.madisonsc.repository.ContestantRepository;
 import xyz.raymoore.madisonsc.repository.PickRepository;
 
 @Service
-public class PicksService {
+public class PickQueryService {
 
     private static final int FIRST_SEASON_START_YEAR = 2014;
 
     private final ContestantRepository contestantRepository;
     private final PickRepository pickRepository;
 
-    public PicksService(ContestantRepository contestantRepository, PickRepository pickRepository) {
+    public PickQueryService(ContestantRepository contestantRepository, PickRepository pickRepository) {
         this.contestantRepository = contestantRepository;
         this.pickRepository = pickRepository;
     }
@@ -100,7 +100,7 @@ public class PicksService {
                     contestant,
                     calculateRecord(cumulativePicks),
                     calculateRecord(weeklyPicks),
-                    weeklyPicks.stream().map(PicksService::toPickView).toList()
+                    weeklyPicks.stream().map(PickQueryService::toPickView).toList()
             ));
         }
 

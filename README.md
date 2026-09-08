@@ -191,7 +191,8 @@ The backend uses the following package convention within each subproject, includ
 | `category` | Fixed project-specific values used for validation and business logic. | `Team` |
 | `domain` | Database-mapped records representing stored data. | `Contestant`, `Pick` |
 | `repository` | Spring Data JDBC interfaces and JDBC-backed classes that read and write those records. | `ContestantRepository`, `PickRepository`, `PickSubmissionRepository` |
-| `dto` | HTTP request/response objects. | `LatestWeekResponse`, `WeeklyPicksResponse`, `PickSubmissionRequest`, `PickSubmissionResponse` |
+| `dto.query` | Public read API response contracts. | `LatestWeekResponse`, `WeeklyPicksResponse` |
+| `dto.submission` | Administrator pick-submission API contracts. | `PickSubmissionRequest`, `PickSubmissionResponse` |
 
 `@SpringBootApplication` enables Spring's automatic configuration. Spring Data JDBC creates the implementation of `ContestantRepository` in `xyz.raymoore.madisonsc.repository`, which extends `ListCrudRepository<Contestant, UUID>`. Its inherited `findAll()` method generates a SELECT for all mapped columns and returns a `List<Contestant>`; no handwritten query is needed. `PickRepository` in the same package extends `ListCrudRepository<Pick, UUID>` for pick access. The `@Bean` method registers a `CommandLineRunner`: Spring supplies its repository argument and runs it after startup migrations finish.
 

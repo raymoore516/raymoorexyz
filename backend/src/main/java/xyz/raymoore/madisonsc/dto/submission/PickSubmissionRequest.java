@@ -1,4 +1,4 @@
-package xyz.raymoore.madisonsc.dto;
+package xyz.raymoore.madisonsc.dto.submission;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

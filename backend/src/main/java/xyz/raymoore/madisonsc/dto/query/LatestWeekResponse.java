@@ -1,4 +1,4 @@
-package xyz.raymoore.madisonsc.dto;
+package xyz.raymoore.madisonsc.dto.query;
 
 import org.jspecify.annotations.Nullable;
 

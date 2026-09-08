@@ -1,4 +1,4 @@
-package xyz.raymoore.madisonsc.dto;
+package xyz.raymoore.madisonsc.dto.query;
 
 import java.math.BigDecimal;
 import java.util.List;

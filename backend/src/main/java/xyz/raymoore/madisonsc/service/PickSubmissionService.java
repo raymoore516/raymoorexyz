@@ -17,7 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import xyz.raymoore.madisonsc.category.Team;
 import xyz.raymoore.madisonsc.domain.Contestant;
 import xyz.raymoore.madisonsc.domain.Pick;
-import xyz.raymoore.madisonsc.dto.PickSubmissionRequest;
+import xyz.raymoore.madisonsc.dto.submission.PickSubmissionRequest;
 import xyz.raymoore.madisonsc.repository.ContestantRepository;
 import xyz.raymoore.madisonsc.repository.PickSubmissionRepository;
 
