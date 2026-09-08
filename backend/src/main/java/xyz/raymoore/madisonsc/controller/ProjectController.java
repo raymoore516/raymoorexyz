@@ -3,16 +3,17 @@ package xyz.raymoore.madisonsc.controller;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import xyz.raymoore.madisonsc.domain.Contestant;
 import xyz.raymoore.madisonsc.repository.ContestantRepository;
 
-@org.springframework.web.bind.annotation.RestController
+@RestController
 @RequestMapping("/api/madisonsc")
-public class RestController {
+public class ProjectController {
 
     private final ContestantRepository contestantRepository;
 
-    public RestController(ContestantRepository contestantRepository) {
+    public ProjectController(ContestantRepository contestantRepository) {
         this.contestantRepository = contestantRepository;
     }
 
