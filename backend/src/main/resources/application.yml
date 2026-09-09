@@ -8,7 +8,8 @@ spring:
   flyway:
     default-schema: public
     schemas: public,madisonsc
-    baseline-on-migrate: false
+    # One-time production attachment setting. Return to false after Flyway records baseline 0 and applies V1.
+    baseline-on-migrate: true
     baseline-version: "0"
   sql:
     init:
