@@ -15,7 +15,11 @@ export default function NavigationBar() {
   ));
 
   function openMenu() {
-    drawer.current?.showModal();
+    const dialog = drawer.current;
+    if (!dialog) return;
+
+    dialog.showModal();
+    dialog.focus();
     setIsOpen(true);
   }
 
@@ -48,6 +52,7 @@ export default function NavigationBar() {
         id="site-navigation"
         className="navigation-drawer"
         aria-label="Main navigation"
+        tabIndex={-1}
         onClose={() => setIsOpen(false)}
         onCancel={() => setIsOpen(false)}
         onClick={(event) => {

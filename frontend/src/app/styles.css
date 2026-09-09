@@ -84,6 +84,10 @@ body {
   transition: transform 200ms ease, display 200ms allow-discrete, overlay 200ms allow-discrete;
 }
 
+.navigation-drawer:focus {
+  outline: none;
+}
+
 .navigation-drawer[open] {
   transform: translateX(0);
 }
