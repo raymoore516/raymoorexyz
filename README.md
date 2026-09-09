@@ -6,7 +6,7 @@ The project is also a learning exercise in Spring Boot, React, TypeScript, and A
 
 ## Status
 
-The database foundation is implemented: local PostgreSQL through Docker Compose, Flyway migrations, and Spring Data JDBC domain records and repositories for contestants and picks. The Spring Boot application serves public contestant, latest-week, and weekly-picks endpoints plus a secret-protected administrator pick-submission endpoint. The React/TypeScript frontend has shared navigation, redirects `/madisonsc` to the latest populated week, and renders responsive weekly standings with an explicit empty state.
+The database foundation is implemented: local PostgreSQL through Docker Compose, Flyway migrations, and Spring Data JDBC domain records and repositories for contestants and picks. The Spring Boot application serves public latest-week and weekly-picks endpoints plus a secret-protected administrator pick-submission endpoint. The React/TypeScript frontend has shared navigation, redirects `/madisonsc` to the latest populated week, and renders responsive weekly standings with an explicit empty state.
 
 ## Developer prerequisites (macOS / Homebrew)
 
@@ -84,7 +84,7 @@ Open **http://localhost:5173/** in your browser. The page displays **Hello World
 | `src/main.tsx` | Starts React, mounts `App` into that element, and imports the CSS. |
 | `src/App.tsx` | Top-level component; selects the current page and renders shared navigation. |
 | `src/app/pages/HomePage.tsx` | Global home page returning the heading and paragraph. Edit the text here. |
-| `src/projects/madisonsc/pages/MadisonScPage.tsx` | Madison SC landing page that finds and navigates to the latest populated week, or displays the empty state. |
+| `src/projects/madisonsc/pages/LatestWeekPage.tsx` | Madison SC landing page that finds and navigates to the latest populated week, or displays the empty state. |
 | `src/projects/madisonsc/pages/WeeklyPicksPage.tsx` | Weekly standings view with Year/Week selectors and responsive contestant/pick cards. |
 | `src/projects/madisonsc/api/madisonScApi.ts` | Typed frontend contracts and fetch calls for Madison SC JSON endpoints. |
 | `src/app/styles.css` | Shared CSS, including the responsive slide-out navigation. |
@@ -151,7 +151,7 @@ PostgreSQL runs in a Docker container. You do not need a separate Postgres serve
 
    On startup, Flyway applies `backend/src/main/resources/db/migration/V1__create_madisonsc.sql`. It establishes `madisonsc.contestant`, `madisonsc.pick`, and the pick indexes. UUIDv4 IDs use PostgreSQL's built-in `pg_catalog.gen_random_uuid()`; no extension is required. Migration history lives in `public.flyway_schema_history`.
 
-   `App.java` then calls `ContestantRepository.findAllAlphabetically()` to fetch every row and column from `madisonsc.contestant`, prints each mapped `Contestant` record using `System.out.println`, and starts the web server on port 8080. A fresh database prints `Found 0 contestant(s).`; migrations intentionally contain no sample contestants. The table is singular and schema-qualified, as specified in the project plan.
+   `App.java` starts the Spring application and its web server on port 8080. Migrations intentionally contain no sample contestants; add local development data explicitly when needed.
 
 4. Open a SQL session to inspect the database or add a contestant:
 

@@ -26,26 +26,10 @@ export type WeeklyContestant = {
   picks: WeeklyPick[];
 };
 
-export type WeeklyPicks = {
+export type WeeklyPicksResponse = {
   year: number;
   week: number;
   seasonLabel: string;
   availableYears: number[];
   contestants: WeeklyContestant[];
 };
-
-async function getJson<T>(path: string, signal: AbortSignal): Promise<T> {
-  const response = await fetch(path, { signal });
-  if (!response.ok) {
-    throw new Error(`Request failed (${response.status})`);
-  }
-  return response.json() as Promise<T>;
-}
-
-export function getLatestWeek(signal: AbortSignal): Promise<LatestWeek> {
-  return getJson('/api/madisonsc/latest', signal);
-}
-
-export function getWeeklyPicks(year: number, week: number, signal: AbortSignal): Promise<WeeklyPicks> {
-  return getJson(`/api/madisonsc/picks/${year}/${week}`, signal);
-}

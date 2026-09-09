@@ -1,33 +1,23 @@
 package xyz.raymoore.madisonsc.controller;
 
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import xyz.raymoore.madisonsc.domain.Contestant;
 import xyz.raymoore.madisonsc.dto.query.LatestWeekResponse;
 import xyz.raymoore.madisonsc.dto.query.WeeklyPicksResponse;
-import xyz.raymoore.madisonsc.repository.ContestantRepository;
 import xyz.raymoore.madisonsc.service.PickQueryService;
 
 @RestController
-@RequestMapping("/api/madisonsc")
-public class ProjectController {
+@RequestMapping("/api/madisonsc/picks")
+public class PickQueryController {
 
-    private final ContestantRepository contestantRepository;
     private final PickQueryService pickQueryService;
 
-    public ProjectController(ContestantRepository contestantRepository, PickQueryService pickQueryService) {
-        this.contestantRepository = contestantRepository;
+    public PickQueryController(PickQueryService pickQueryService) {
         this.pickQueryService = pickQueryService;
-    }
-
-    @GetMapping("/contestants")
-    public List<Contestant> getContestants() {
-        return contestantRepository.findAllAlphabetically();
     }
 
     @GetMapping("/latest")
@@ -35,7 +25,7 @@ public class ProjectController {
         return pickQueryService.findLatestWeek();
     }
 
-    @GetMapping("/picks/{year}/{week}")
+    @GetMapping("/{year}/{week}")
     public WeeklyPicksResponse getWeeklyPicks(
             @PathVariable("year") int year,
             @PathVariable("week") int week

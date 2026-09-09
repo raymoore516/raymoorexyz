@@ -4,7 +4,7 @@
 
 Build an NFL pick'em league tracker for weekly picks against the spread, results, and cumulative standings as a project within the raymoore.xyz personal website. It will replace the existing Madison SC website.
 
-This is the implementation plan for AI coding agents. The database foundation is implemented with Flyway V1, mapped `Contestant` and `Pick` Java records in `xyz.raymoore.madisonsc.domain`, repositories, and Spring MVC contestant/latest-week/weekly-picks endpoints. The React frontend resolves `/madisonsc` through the latest-week API, navigates to the populated weekly route, and renders responsive standings cards or an explicit empty state. The secret-protected administrator submission API is implemented. Proposed API contracts and unresolved business rules are labeled explicitly.
+This is the implementation plan for AI coding agents. The database foundation is implemented with Flyway V1, mapped `Contestant` and `Pick` Java records in `xyz.raymoore.madisonsc.domain`, repositories, and Spring MVC latest-week/weekly-picks endpoints. The React frontend resolves `/madisonsc` through the latest-week API, navigates to the populated weekly route, and renders responsive standings cards or an explicit empty state. The secret-protected administrator submission API is implemented. Proposed API contracts and unresolved business rules are labeled explicitly.
 
 The [root PROJECT.md](../../PROJECT.md) owns shared technologies, application architecture, authentication strategy, database migration conventions, and site navigation. This file owns Madison SC business requirements, its database schema, routes, UI behavior, and acceptance criteria. Read [AGENTS.md](../../AGENTS.md) for collaboration guidance and [README.md](../../README.md) for developer setup and day-to-day workflows. Keep these documents consistent as decisions are made.
 
@@ -84,13 +84,12 @@ Keep contestant data and operational pick/result changes separate from Flyway sc
 
 ## HTTP API and browser routes
 
-Retain the existing administrator submission header and shorthand body for the proof of concept. Unlike the archived Javalin route, the Spring endpoint lives under `/api` because it exchanges JSON rather than rendering the React route. The public contestant, latest-week, weekly-picks, and administrator submission JSON APIs are implemented.
+Retain the existing administrator submission header and shorthand body for the proof of concept. Unlike the archived Javalin route, the Spring endpoint lives under `/api` because it exchanges JSON rather than rendering the React route. The public latest-week and weekly-picks APIs and administrator submission API are implemented.
 
 | Method | Path | Purpose / intended access |
 | --- | --- | --- |
 | GET | `/madisonsc` | React landing page. It asks the public API for the latest year/week and displays that week's data, or an explicit empty state. |
-| GET | `/api/madisonsc/latest` | Public latest-week lookup, returning the maximum `year`/`week` with pick entries or an empty result. |
-| GET | `/api/madisonsc/contestants` | Public contestant list, sorted alphabetically by name. |
+| GET | `/api/madisonsc/picks/latest` | Public latest-week lookup, returning the maximum `year`/`week` with pick entries or an empty result. |
 | GET | `/madisonsc/picks/{year}/{week}` | React weekly view. |
 | GET | `/api/madisonsc/picks/{year}/{week}` | Public weekly view data, including cumulative standings. |
 | POST | `/api/madisonsc/picks/{year}/{week}` | Administrator-only submission of one to five picks using `api-secret`; JSON response. |
@@ -99,7 +98,7 @@ The JSON GET and POST intentionally use the same `/api/madisonsc/picks/{year}/{w
 
 ### Madison SC landing page
 
-`GET /api/madisonsc/latest` runs this query against the singular table `madisonsc.pick`:
+`GET /api/madisonsc/picks/latest` runs this query against the singular table `madisonsc.pick`:
 
 ```sql
 SELECT year, week
@@ -159,7 +158,7 @@ The `madisonsc` schema belongs to this project within the shared `raymoorexyz` d
 
 Use the shared React/TypeScript conventions, `SiteLayout`, and `SiteNavigation` from the root plan.
 
-- Put Madison SC pages in `frontend/src/projects/madisonsc/pages/` and project components in `frontend/src/projects/madisonsc/components/`. The project landing page is `MadisonScPage.tsx`; suggested weekly components are `WeekNavigation`, `ContestantCard`, `RecordSummary`, and `PickCard`. Shared application pages and components belong under `frontend/src/app/`.
+- Put Madison SC pages in `frontend/src/projects/madisonsc/pages/` and project components in `frontend/src/projects/madisonsc/components/`. The latest-week landing page is `LatestWeekPage.tsx`; suggested weekly components are `WeekNavigation`, `ContestantCard`, `RecordSummary`, and `PickCard`. Shared application pages and components belong under `frontend/src/app/`.
 - Put backend code under `backend/src/main/java/xyz/raymoore/madisonsc/`, organized into `category`, `controller`, `service`, `domain`, `repositorye`, and `dto` as needed. Put fixed project values such as `Team` in `category`, mapped records in `domain`, and repository interfaces and classes in `repository`. Group public read contracts in `dto.query` and administrator pick-submission contracts in `dto.submission`, following the shared package and inner `Builder` conventions in `PROJECT.md`. Keep typed API calls and team/result types aligned with the backend contract.
 - Define React routes for `/madisonsc` and `/madisonsc/picks/:year/:week`. Use relative API paths such as `/api/madisonsc/picks/13/1` through Vite's `/api` proxy during development.
 - The shared Madison SC link points to `/madisonsc`. React calls the latest-week API, then loads the selected weekly data. A normal navigation link also works on a direct browser visit.

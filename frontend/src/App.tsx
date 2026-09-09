@@ -1,7 +1,7 @@
 import HomePage from './app/pages/HomePage';
-import MadisonScPage from './projects/madisonsc/pages/MadisonScPage';
+import LatestWeekPage from './projects/madisonsc/pages/LatestWeekPage';
 import WeeklyPicksPage from './projects/madisonsc/pages/WeeklyPicksPage';
-import NavBar from './app/components/NavBar';
+import NavigationBar from './app/components/NavigationBar';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 function NotFoundPage() {
@@ -16,10 +16,10 @@ function NotFoundPage() {
 export default function App() {
   return (
     <BrowserRouter>
-      <NavBar />
+      <NavigationBar />
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/madisonsc" element={<MadisonScPage />} />
+        <Route path="/madisonsc" element={<LatestWeekPage />} />
         <Route path="/madisonsc/picks/:year/:week" element={<WeeklyPicksPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

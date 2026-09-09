@@ -6,7 +6,7 @@ const pages = [
   { path: '/madisonsc', label: 'Madison SC' },
 ];
 
-export default function NavBar() {
+export default function NavigationBar() {
   const [isOpen, setIsOpen] = useState(false);
   const drawer = useRef<HTMLDialogElement>(null);
   const { pathname } = useLocation();

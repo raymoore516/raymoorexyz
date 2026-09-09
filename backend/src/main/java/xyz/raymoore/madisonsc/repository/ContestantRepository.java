@@ -11,9 +11,6 @@ import xyz.raymoore.madisonsc.domain.Contestant;
 @NullMarked
 public interface ContestantRepository extends ListCrudRepository<Contestant, UUID> {
 
-    @Query("SELECT contestant_id, entry_date, name FROM madisonsc.contestant ORDER BY name ASC")
-    List<Contestant> findAllAlphabetically();
-
     @Query("""
             SELECT contestant_id, entry_date, name
             FROM madisonsc.contestant

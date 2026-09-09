@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getWeeklyPicks } from '../api/madisonScApi';
-import type { PickRecord, WeeklyPick, WeeklyPicks } from '../api/madisonScApi';
+import { getWeeklyPicks } from '../api/picks';
+import type { PickRecord, WeeklyPick, WeeklyPicksResponse } from '../types/picks';
 import '../styles.css';
 
 const weeks = Array.from({ length: 18 }, (_, index) => index + 1);
@@ -42,7 +42,7 @@ export default function WeeklyPicksPage() {
   const year = Number(params.year);
   const week = Number(params.week);
   const validRoute = Number.isInteger(year) && year > 0 && Number.isInteger(week) && week >= 1 && week <= 18;
-  const [data, setData] = useState<WeeklyPicks | null>(null);
+  const [data, setData] = useState<WeeklyPicksResponse | null>(null);
   const [isLoading, setIsLoading] = useState(validRoute);
   const [error, setError] = useState<string | null>(null);
 

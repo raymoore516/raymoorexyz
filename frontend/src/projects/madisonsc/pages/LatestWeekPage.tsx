@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { getLatestWeek } from '../api/madisonScApi';
-import type { LatestWeek } from '../api/madisonScApi';
+import { getLatestWeek } from '../api/picks';
+import type { LatestWeek } from '../types/picks';
 import '../styles.css';
 
-export default function MadisonScPage() {
+export default function LatestWeekPage() {
   const [latestWeek, setLatestWeek] = useState<LatestWeek | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
