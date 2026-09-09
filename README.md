@@ -242,7 +242,7 @@ If an error names user `"${DB_USER}"` literally, Java did not receive a usable `
 
 ### Schema changes
 
-Add future schema changes as `V2__description.sql`, `V3__description.sql`, etc. Applied migrations must remain unchanged. The archived application's `0003.sql` uses unquoted camelCase columns, which Postgres stores as `contestantid`, `pickid`, and `entrydate`; this implementation follows the new plan's snake_case columns. Production adoption requires confirming/converting those names first. Automatic baselining is temporarily enabled for the first production attachment at version 0 and must be disabled immediately after that succeeds. See the [first-attachment section in PROJECT.md](PROJECT.md) before connecting Flyway to an existing database.
+Add future schema changes as `V2__description.sql`, `V3__description.sql`, etc. Applied migrations must remain unchanged. The archived application's `0003.sql` uses unquoted camelCase columns, which Postgres stores as `contestantid`, `pickid`, and `entrydate`; this implementation follows the new plan's snake_case columns. The production database was converted and attached to Flyway with baseline 0 before V1 ran. Automatic baselining is now disabled by using Flyway's default setting. See the [first-attachment section in PROJECT.md](PROJECT.md) for the adoption record.
 
 During initial development, V1 was explicitly revised to use native UUID generation without adding V2. A local database that already applied the earlier V1 will fail Flyway checksum validation. Use a fresh local database, or deliberately reconcile both existing primary-key defaults and Flyway history before restarting. A checksum repair alone does not change the old defaults. This code change does not modify existing databases or remove installed extensions.
 
@@ -270,7 +270,7 @@ The root `Dockerfile` builds and serves the entire application as one Render web
 2. The Maven stage copies that output into Spring Boot's generated `static/` classpath directory and packages the executable JAR.
 3. The runtime stage contains Java and the JAR only. Spring Boot serves both the React files and `/api` from the same origin.
 
-Before the first deployment to the existing production database, stop the old application, back up the database, and run `.temp/preflight-conversion.sql` followed by `.temp/preflight-validation.sql` in the production SQL console. The `.temp` directory is intentionally ignored by Git and is not included in the Docker build.
+The initial production deployment converted and validated the existing database before attaching Flyway. The local `.temp` copies of those one-time SQL scripts are intentionally ignored by Git and are not included in the Docker build.
 
 In Render:
 
@@ -281,7 +281,7 @@ In Render:
 5. Set the health check path to `/api/madisonsc/picks/latest` so readiness checks also verify database-backed reads.
 6. Deploy the selected commit. Verify `/`, `/madisonsc`, a direct weekly URL, the latest-week JSON endpoint, and a missing `/api` route.
 
-For the first production startup only, `spring.flyway.baseline-on-migrate` is temporarily enabled with baseline version 0. After Render reports a successful deploy, confirm that `public.flyway_schema_history` contains baseline 0 and successful V1 entries. Then change `baseline-on-migrate` back to `false`, commit that change, and deploy again.
+The initial production startup recorded baseline 0 and applied V1 successfully. Automatic baselining has since been removed from `application.yml`, restoring Flyway's default of `false` for subsequent deployments.
 
 ## Planned architecture
 
