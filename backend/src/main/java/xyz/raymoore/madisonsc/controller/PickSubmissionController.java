@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import xyz.raymoore.auth.ApiSecretRequired;
 import xyz.raymoore.madisonsc.dto.submission.PickSubmissionRequest;
 import xyz.raymoore.madisonsc.dto.submission.PickSubmissionResponse;
 import xyz.raymoore.madisonsc.service.PickSubmissionService;
@@ -22,6 +23,7 @@ public class PickSubmissionController {
         this.pickSubmissionService = pickSubmissionService;
     }
 
+    @ApiSecretRequired
     @PostMapping("/{year}/{week}")
     public PickSubmissionResponse submitWeeklyPicks(
             @PathVariable("year") int year,

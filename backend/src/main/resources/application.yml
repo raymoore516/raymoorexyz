@@ -16,4 +16,4 @@ spring:
       mode: never
 
 app:
-  api-secret: ${APP_API_SECRET}
+  api-secret: ${API_SECRET}
