@@ -86,7 +86,8 @@ Open **http://localhost:5173/** in your browser. The page displays **Hello World
 | `src/app/pages/HomePage.tsx` | Global home page returning the heading and paragraph. Edit the text here. |
 | `src/projects/madisonsc/pages/LatestWeekPage.tsx` | Madison SC landing page that finds and navigates to the latest populated week, or displays the empty state. |
 | `src/projects/madisonsc/pages/WeeklyPicksPage.tsx` | Weekly standings view with Year/Week selectors and responsive contestant/pick cards. |
-| `src/projects/madisonsc/api/madisonScApi.ts` | Typed frontend contracts and fetch calls for Madison SC JSON endpoints. |
+| `src/projects/madisonsc/api/picks.ts` | Fetch calls for Madison SC pick-query endpoints. |
+| `src/projects/madisonsc/types/picks.ts` | TypeScript representations of Madison SC pick-query responses. |
 | `src/app/styles.css` | Shared CSS, including the responsive slide-out navigation. |
 | `tsconfig.json` | Enables strict TypeScript checking. |
 | `vite.config.ts` | Configures React support and the local server ports. |
@@ -105,7 +106,7 @@ npm run preview
 
 `typecheck` checks types without writing compiled files. `build` also runs that check, then produces deployable HTML, JavaScript, and CSS in `frontend/dist/`. Vite alone transpiles TypeScript without type-checking, so the separate check is intentional. `preview` serves the last build at **http://localhost:4173/**; rebuild after edits when using preview, and stop it with **Ctrl+C**. Preview is a local build check, not the production server. No frontend automated tests or lint command are configured in this initial scaffold.
 
-npm manages only `frontend/`; Maven continues to manage the Java backend. npm is used in local development and in CI/deployment builds to install dependencies and build the static frontend. The eventual production setup will package these files into Spring Boot, so the running Java application will not need Node or npm. The current backend serves public Madison SC JSON under `/api/madisonsc`, and Vite proxies `/api` from port 5173 to Spring Boot on port 8080 during development. The home page itself continues to need no database calls.
+npm manages only `frontend/`; Maven continues to manage the Java backend. npm is used in local development and in the Docker build to install dependencies and build the static frontend. The Docker build packages those files into Spring Boot, so the running Java application does not need Node or npm. The backend serves public Madison SC JSON under `/api/madisonsc`, and Vite proxies `/api` from port 5173 to Spring Boot on port 8080 during development. The home page itself continues to need no database calls.
 
 ## Local developer setup: PostgreSQL on localhost:5432
 
@@ -120,10 +121,10 @@ PostgreSQL runs in a Docker container. You do not need a separate Postgres serve
    DB_USER=local-dev-user
    DB_PASSWORD='local-dev-password'
    DB_PORT=5432
-   APP_API_SECRET='local-dev-api-secret'
+   API_SECRET='local-dev-api-secret'
    ```
 
-   Set `DB_PASSWORD` and `APP_API_SECRET` to your chosen local-only values. Keep them single-quoted so literal `$` characters are preserved; choose values without single quotes or backslashes for use with both Compose and the shell. `.env` is ignored by Git. `APP_API_SECRET` protects administrator write requests and is not exposed to the React application. All values shown above are required: configuration files intentionally provide no inline environment-variable defaults, so a missing value fails fast instead of silently selecting a fallback.
+   Set `DB_PASSWORD` and `API_SECRET` to your chosen local-only values. Keep them single-quoted so literal `$` characters are preserved; choose values without single quotes or backslashes for use with both Compose and the shell. `.env` is ignored by Git. `API_SECRET` protects administrator write requests and is not exposed to the React application. All values shown above are required: configuration files intentionally provide no inline environment-variable defaults, so a missing value fails fast instead of silently selecting a fallback.
 
    These example settings create database `raymoorexyz`, user `local-dev-user`, and expose Postgres only at `127.0.0.1:5432`. Change `DB_PORT` if port 5432 is already occupied.
 
@@ -182,7 +183,7 @@ PostgreSQL runs in a Docker container. You do not need a separate Postgres serve
      http://localhost:8080/api/madisonsc/picks/13/1
    ```
 
-   Replace the header value with your own `APP_API_SECRET`. A successful submission returns `{"success":true}`. Each entry uses a team code, a signed spread or `PK`, and an optional `W`, `L`, or `T`; omitting the result leaves that pick pending. The endpoint inserts each submitted batch as one transaction. You may submit the week's picks incrementally, but a contestant cannot have more than five total picks for a year and week or select the same team twice.
+   Replace the header value with your own `API_SECRET`. A successful submission returns `{"success":true}`. Each entry uses a team code, a signed spread or `PK`, and an optional `W`, `L`, or `T`; omitting the result leaves that pick pending. The endpoint inserts each submitted batch as one transaction. You may submit the week's picks incrementally, but a contestant cannot have more than five total picks for a year and week or select the same team twice.
 
 The backend uses the following package convention within each subproject, including future subprojects:
 
@@ -208,7 +209,7 @@ The backend uses the following package convention within each subproject, includ
 | `DB_PASSWORD` | `POSTGRES_PASSWORD` | Sets that role's initial password to the value you supply. |
 | `DB_NAME=raymoorexyz` | `POSTGRES_DB` | Creates the local application database named `raymoorexyz`. |
 | `DB_PORT=5432` | Host port mapping | Makes the container's PostgreSQL port available on your Mac. |
-| `APP_API_SECRET` | Not used by Compose | Protects administrator POST requests after `.env` is exported to Spring Boot. |
+| `API_SECRET` | Not used by Compose | Protects administrator POST requests after `.env` is exported to Spring Boot. |
 
 Java and database clients use the same username, password, and database to connect. For a GUI database client, use host `127.0.0.1`, port `5432`, and the values from `.env`. The corresponding JDBC URL is `jdbc:postgresql://localhost:5432/raymoorexyz` with the example settings above.
 
@@ -220,7 +221,7 @@ Open the root `raymoore-xyz/` folder so `.env` and `compose.yaml` remain visible
 
 In **Run → Edit Configurations**, set **Program arguments** to `--spring.profiles.active=local`. In **Environment variables**, use **Browse for .env files and scripts** to select the root `.env` by its absolute path. Apply the settings and launch that saved configuration. IntelliJ passes the file's values to Java; opening `.env` in the editor alone does not load it. See [IntelliJ environment-file configuration](https://www.jetbrains.com/help/idea/program-arguments-and-environment-variables.html).
 
-Outside the local profile, supply `DB_URL` (a full `jdbc:postgresql://host:port/database` URL), `DB_USER`, `DB_PASSWORD`, and `APP_API_SECRET`.
+Outside the local profile, supply `DB_URL` (a full `jdbc:postgresql://host:port/database` URL), `DB_USER`, `DB_PASSWORD`, and `API_SECRET`.
 
 ### Starting and stopping during everyday development
 
@@ -241,7 +242,7 @@ If an error names user `"${DB_USER}"` literally, Java did not receive a usable `
 
 ### Schema changes
 
-Add future schema changes as `V2__description.sql`, `V3__description.sql`, etc. Applied migrations must remain unchanged. The archived application's `0003.sql` uses unquoted camelCase columns, which Postgres stores as `contestantid`, `pickid`, and `entrydate`; this implementation follows the new plan's snake_case columns. Production adoption requires confirming/converting those names first. Automatic baselining is disabled. See the [first-attachment section in PROJECT.md](PROJECT.md) before connecting Flyway to an existing database.
+Add future schema changes as `V2__description.sql`, `V3__description.sql`, etc. Applied migrations must remain unchanged. The archived application's `0003.sql` uses unquoted camelCase columns, which Postgres stores as `contestantid`, `pickid`, and `entrydate`; this implementation follows the new plan's snake_case columns. Production adoption requires confirming/converting those names first. Automatic baselining is temporarily enabled for the first production attachment at version 0 and must be disabled immediately after that succeeds. See the [first-attachment section in PROJECT.md](PROJECT.md) before connecting Flyway to an existing database.
 
 During initial development, V1 was explicitly revised to use native UUID generation without adding V2. A local database that already applied the earlier V1 will fail Flyway checksum validation. Use a fresh local database, or deliberately reconcile both existing primary-key defaults and Flyway history before restarting. A checksum repair alone does not change the old defaults. This code change does not modify existing databases or remove installed extensions.
 
@@ -260,6 +261,27 @@ To run the packaged application after exporting `.env`:
 ```sh
 java -jar backend/target/raymoore-xyz-0.0.1-SNAPSHOT.jar --spring.profiles.active=local
 ```
+
+## Production deployment to Render
+
+The root `Dockerfile` builds and serves the entire application as one Render web service:
+
+1. The Node stage runs `npm ci` and `npm run build`, producing `frontend/dist/`.
+2. The Maven stage copies that output into Spring Boot's generated `static/` classpath directory and packages the executable JAR.
+3. The runtime stage contains Java and the JAR only. Spring Boot serves both the React files and `/api` from the same origin.
+
+Before the first deployment to the existing production database, stop the old application, back up the database, and run `.temp/preflight-conversion.sql` followed by `.temp/preflight-validation.sql` in the production SQL console. The `.temp` directory is intentionally ignored by Git and is not included in the Docker build.
+
+In Render:
+
+1. Create a **Web Service** from the linked Git repository.
+2. Choose **Docker** as the language/runtime, select the deployment branch, leave the root directory empty, and use `./Dockerfile` as the Dockerfile path.
+3. Leave Build Command, Start Command, and Docker Command empty; Render uses the Dockerfile.
+4. Configure `DB_URL`, `DB_USER`, `DB_PASSWORD`, and `API_SECRET`. The container reads Render's `PORT` value and defaults to port 10000 when run elsewhere.
+5. Set the health check path to `/api/madisonsc/picks/latest` so readiness checks also verify database-backed reads.
+6. Deploy the selected commit. Verify `/`, `/madisonsc`, a direct weekly URL, the latest-week JSON endpoint, and a missing `/api` route.
+
+For the first production startup only, `spring.flyway.baseline-on-migrate` is temporarily enabled with baseline version 0. After Render reports a successful deploy, confirm that `public.flyway_schema_history` contains baseline 0 and successful V1 entries. Then change `baseline-on-migrate` back to `false`, commit that change, and deploy again.
 
 ## Planned architecture
 

@@ -34,7 +34,7 @@ This file is the shared technical plan. The [Madison SC plan](.projects/madisons
 | Initial API authentication | `api-secret` HTTP header, enforced on the backend | Only administrator submissions require the configured secret. Public reads require no login. |
 | Future browser authentication | Spring Security, Google OAuth 2.0 / OpenID Connect | Protect later browser administration; no JWT implementation in the proof of concept. |
 | Local infrastructure | Docker Compose | Run Postgres locally while application processes run in the IDEs. |
-| Production | Docker image deployed to Render via Docker Hub | One Spring Boot process serving the API and built frontend. |
+| Production | Docker image built from the repository and deployed by Render | One Spring Boot process serving the API and built frontend. |
 
 Vite, npm, and serving the frontend from Spring Boot are the recommended defaults adopted by this plan. Production runs PostgreSQL 15.19 on aarch64; use PostgreSQL 15.19 for local development and database integration tests. The backend pins Java 25, Spring Boot 4.1.1, and Maven 3.9.11 (Wrapper 3.3.4). The frontend uses Node 24.20.0 (`frontend/.nvmrc`), with exact dependency versions in `frontend/package.json` and the committed `frontend/package-lock.json`. Use compatible stable releases, commit the Maven Wrapper and npm lockfile, and let Spring Boot manage compatible Spring dependency versions. Do not use dependency version ranges or an unpinned `latest` container tag for reproducible builds.
 
@@ -71,9 +71,11 @@ Vite's [development proxy](https://vite.dev/config/server-options.html#server-pr
 3. Package and run Spring Boot with its embedded servlet server, using one externally exposed application port.
 4. Serve the UI and API from the same HTTPS origin; future login routes will use that origin too.
 
-Use a root Dockerfile with separate frontend-build, backend-build, and Java-runtime stages. Arrange Maven resources so the frontend build enters the JAR; do not commit `dist/` or copy generated assets into tracked source directories. A normal backend-only development build should not require rebuilding the frontend.
+The root Dockerfile implements separate frontend-build, backend-build, and Java-runtime stages. The frontend stage creates `dist/`, the backend stage copies it into generated classpath resources under `static/` before packaging, and the runtime stage contains only Java and the executable JAR. Render builds this Dockerfile directly from the linked Git repository. Do not commit `dist/` or copy generated assets into tracked source directories. A normal backend-only development build does not require rebuilding the frontend.
 
-React page URLs need an intentional Spring MVC fallback to `index.html` for browser navigation and refresh. Limit that fallback to GET/HEAD UI navigation; unknown `/api` routes and missing assets must retain appropriate errors. Never forward write requests to the SPA. Project plans define page routes and any method-specific overlap with backend endpoints.
+When the built frontend's `static/index.html` is present on the classpath, `ReactRouteFallback` handles missing-resource errors after Spring MVC has tried its controllers and static resources. GET and HEAD requests that explicitly accept `text/html` with a positive quality value are forwarded to `index.html`, allowing React Router to handle direct navigation and refresh without duplicating its route list in Spring. Other requests use Spring's normal error handling, including API and asset requests accepting JSON or `*/*`. Direct browser navigation to any missing URL (including an API or asset URL) can still load React's Not Found page. The fallback is inactive in backend-only local builds; Vite handles local page navigation. React Router remains the source of truth for page routes.
+
+Controller methods that require the shared administrator secret are marked with `@ApiSecretRequired`. A Spring MVC interceptor validates the `api-secret` header only after Spring has selected an annotated handler method, so authentication does not duplicate controller URLs or HTTP methods.
 
 This combines [Vite's static build output](https://vite.dev/guide/build) with [Spring Boot's classpath static-resource support](https://docs.spring.io/spring-boot/reference/web/servlet.html). Node and npm are build/development dependencies used locally and in CI/image builds; the proposed production runtime is Java plus a separately hosted Postgres database.
 
@@ -194,13 +196,13 @@ This root plan will also describe schema requirements for shared personal-site f
 ### Proof of concept: API secret
 
 - Retain the `api-secret` HTTP header. It is a shared secret compared with backend configuration; it is **not a JWT** and does not require a token issuer, refresh flow, or Google account.
-- Bind `APP_API_SECRET` to a backend property such as `app.api-secret`. Never commit a real secret, log the header, embed it in the frontend, or expose it through a public endpoint.
-- Authenticate every administrator submission on the backend before processing the body. Missing/invalid credentials cannot write. A missing `APP_API_SECRET` configuration prevents application startup; a configured but blank secret fails closed for writes.
-- Spring Security can enforce this through a small authentication filter scoped to the protected administrator routes defined in project plans. Do not turn secret validation into scattered controller logic or introduce an OAuth/JWT server for it.
+- Bind `API_SECRET` to a backend property such as `app.api-secret`. Never commit a real secret, log the header, embed it in the frontend, or expose it through a public endpoint.
+- Authenticate every administrator submission on the backend before processing the body. Missing/invalid credentials cannot write. A missing `API_SECRET` configuration prevents application startup; a configured but blank secret fails closed for writes.
+- The proof of concept uses `@ApiSecretRequired` plus a Spring MVC interceptor so protection is attached to controller methods without route matching in authentication code. When Spring Security is introduced for browser login, migrate this check into that security architecture rather than maintaining two authentication systems. Do not turn secret validation into scattered controller logic or introduce an OAuth/JWT server for it.
 - The API client explicitly supplies the header; the proof of concept has no browser-carried authentication cookie. If Spring Security is installed, scope any CSRF exemption to the header-only administrator operations. Do not disable future browser-login CSRF protection globally. See [Spring Security's CSRF guidance](https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html).
 - Use HTTPS for the deployed API. Local examples use HTTP only on localhost. Ray is the sole administrator; multiple roles and concurrent-edit infrastructure are unnecessary for the initial site.
 
-The `local` profile uses the same secret-header contract as production. `APP_API_SECRET` must be present to start the application locally, but public read clients do not send it; only submission clients supply it through the `api-secret` header. No implicit local administrator bypass is needed.
+The `local` profile uses the same secret-header contract as production. `API_SECRET` must be present to start the application locally, but public read clients do not send it; only submission clients supply it through the `api-secret` header. No implicit local administrator bypass is needed.
 
 ### Later: Google-protected browser administration
 
