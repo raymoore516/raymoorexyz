@@ -294,4 +294,4 @@ PostgreSQL stores application data, Flyway manages SQL schema changes, and Docke
 
 Each project has its own schema within the shared `raymoorexyz` database. The planned shared hamburger navigation will link to Home and Madison SC; this first home page has no navigation.
 
-See [PROJECT.md](PROJECT.md) for shared technologies, architecture, authentication strategy, and implementation guidance. See the [Madison SC project plan](.projects/madisonsc/README.md) for league requirements, the contestant/pick schema, routes, and acceptance criteria. Future project plans belong under `.projects/<project>/README.md`.
+See [PROJECT.md](PROJECT.md) for shared technologies, architecture, authentication strategy, and implementation guidance. See the [Madison SC project plan](projects/madisonsc/README.md) for league requirements, the contestant/pick schema, routes, and acceptance criteria. Future project plans belong under `projects/<project>/README.md`.
