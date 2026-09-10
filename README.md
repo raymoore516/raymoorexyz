@@ -86,8 +86,8 @@ Open **http://localhost:5173/** in your browser. The page displays **Hello World
 | `src/app/pages/HomePage.tsx` | Global home page returning the heading and paragraph. Edit the text here. |
 | `src/projects/madisonsc/pages/LatestWeekPage.tsx` | Madison SC landing page that finds and navigates to the latest populated week, or displays the empty state. |
 | `src/projects/madisonsc/pages/WeeklyPicksPage.tsx` | Weekly standings view with Year/Week selectors and responsive contestant/pick cards. |
-| `src/projects/madisonsc/api/picks.ts` | Fetch calls for Madison SC pick-query endpoints. |
-| `src/projects/madisonsc/types/picks.ts` | TypeScript representations of Madison SC pick-query responses. |
+| `src/projects/madisonsc/api.ts` | Fetch calls for Madison SC pick-query endpoints. |
+| `src/projects/madisonsc/types.ts` | TypeScript representations of Madison SC pick-query responses. |
 | `src/app/styles.css` | Shared CSS, including the responsive slide-out navigation. |
 | `tsconfig.json` | Enables strict TypeScript checking. |
 | `vite.config.ts` | Configures React support and the local server ports. |

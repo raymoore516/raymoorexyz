@@ -1,4 +1,6 @@
-import type { LatestWeek, WeeklyPicksResponse } from '../types/picks';
+import type { LatestWeek, WeeklyPicksResponse } from './types';
+
+const root = '/api/madisonsc';
 
 async function getJson<T>(path: string, signal: AbortSignal): Promise<T> {
   const response = await fetch(path, { signal });
@@ -9,9 +11,9 @@ async function getJson<T>(path: string, signal: AbortSignal): Promise<T> {
 }
 
 export function getLatestWeek(signal: AbortSignal): Promise<LatestWeek> {
-  return getJson('/api/madisonsc/picks/latest', signal);
+  return getJson(`${root}/picks/latest`, signal);
 }
 
 export function getWeeklyPicks(year: number, week: number, signal: AbortSignal): Promise<WeeklyPicksResponse> {
-  return getJson(`/api/madisonsc/picks/${year}/${week}`, signal);
+  return getJson(`${root}/picks/${year}/${week}`, signal);
 }

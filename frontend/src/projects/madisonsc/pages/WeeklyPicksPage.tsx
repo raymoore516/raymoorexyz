@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getWeeklyPicks } from '../api/picks';
-import type { PickRecord, WeeklyPick, WeeklyPicksResponse } from '../types/picks';
+import { getWeeklyPicks } from '../api';
+import type { PickRecord, WeeklyPick, WeeklyPicksResponse } from '../types';
 import '../styles.css';
 
 const weeks = Array.from({ length: 18 }, (_, index) => index + 1);

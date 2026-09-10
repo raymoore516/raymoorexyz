@@ -107,10 +107,10 @@ raymoore-xyz/
 │       │   └── styles.css              # Shared application styles
 │       └── projects/                   # Project-specific frontend code
 │           └── <project>/              # e.g. madisonsc, blog
+│           │   ├── api.ts               # Project API calls
+│           │   ├── types.ts             # Project API types
 │           │   ├── pages/              # Project route-level views
 │           │   ├── components/         # Project-specific UI pieces
-│           │   ├── api/                # Project API calls
-│           │   ├── types/              # Project API types
 │           │   └── styles.css           # Project-specific styles
 ├── backend/
 │   ├── .mvn/wrapper/
@@ -252,10 +252,10 @@ The production conversion and initial baseline were operational steps performed 
 
 - Use npm for frontend dependency management and scripts. Commit `package-lock.json` and use `npm ci` in developer setup and CI. Use `npm run build` for type checking and production assets.
 - Use functional components, hooks, and strict TypeScript. A component is a UI function; props are its inputs, while state holds values that change during interaction.
-- The root of `src/` contains `App.tsx`, `main.tsx`, the shared `app/` directory, and project-specific `projects/`. Shared pages, components, and styles belong under `app/`. Each subproject gets a directory under `src/projects/` (for example, `src/projects/madisonsc/`) with its own `styles.css` and `pages/`, `components/`, `api/`, and `types/` subdirectories as needed. Import the project stylesheet from that project's route-level pages, keep its selectors scoped beneath a project-specific root class, and reserve `src/app/styles.css` for application-wide styling. These are project conventions, not React-required folder names.
+- The root of `src/` contains `App.tsx`, `main.tsx`, the shared `app/` directory, and project-specific `projects/`. Shared pages, components, and styles belong under `app/`. Each subproject gets a directory under `src/projects/` (for example, `src/projects/madisonsc/`) with its own `styles.css`, `api.ts`, `types.ts`, and `pages/` or `components/` subdirectories as needed. Import the project stylesheet from that project's route-level pages, keep its selectors scoped beneath a project-specific root class, and reserve `src/app/styles.css` for application-wide styling. These are project conventions, not React-required folder names.
 - Use React Router for client-side navigation. Define `/` for the global home page, `/madisonsc` for the Madison SC landing page, and the routes specified by each project plan; use router links for internal navigation and keep routing and API fetching explicit. Add broader state/query libraries only when their benefit is clear.
 - Keep state close to its owner and lift it to a common parent when siblings must coordinate. Derive display values instead of storing redundant state. See [Thinking in React](https://react.dev/learn/thinking-in-react).
-- Put HTTP calls in `src/api/`; check non-success responses and handle loading, error, empty, and success states. Cancel or ignore stale requests when route parameters change.
+- Put each project's HTTP calls in its `api.ts`; check non-success responses and handle loading, error, empty, and success states. Cancel or ignore stale requests when route parameters change.
 - Keep server DTOs and frontend types aligned. TypeScript types do not validate incoming JSON at runtime; validate at external boundaries when needed. Avoid `any` and broad type assertions that hide contract mismatches.
 - Run a TypeScript check in addition to the Vite build: Vite transpiles TypeScript but does not itself type-check it. See [Vite's TypeScript behavior](https://vite.dev/guide/features.html#typescript).
 - Use controlled inputs for forms, immutable state updates, stable database IDs as list keys, and effects for external synchronization rather than ordinary derived calculations.
